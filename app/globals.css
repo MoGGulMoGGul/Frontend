@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  --spacing: 0.25rem;
+  --background: #ffffff;
+  --foreground: #171717;
+  --color-gray-light: #ededed;
+  --color-honey: #e89b16;
+  --color-honey-light: #f6c032;
+  --color-honey-pale: #f9d976;
+  --color-honey-pastel: #fff3b0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: Pretendard-Regular, Arial, Helvetica, sans-serif;
+}
+
+@font-face {
+  font-family: "Pretendard-Regular";
+  src: url("https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff")
+    format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d9d9d9;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+input[type="radio"]:checked {
+  border-color: var(--color-honey-pale);
+}
+
+input[type="radio"]::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: #d9d9d9;
+  border-radius: 50%;
+}
+
+input[type="radio"]:checked::before {
+  background-color: var(--color-honey-pale);
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@layer utilities {
+  .hex {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+  .hex-ar {
+    aspect-ratio: 1.15 / 1;
+  }
+  .hex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}

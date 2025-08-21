@@ -1,0 +1,879 @@
+{
+  "signup": [
+    {
+      "id": "testuser",
+      "password": "1234pass",
+      "nickname": "테스트",
+      "userNo": 1
+    },
+    {
+      "id": "user1",
+      "password": "qwer1234!",
+      "nickname": "꿀꿀",
+      "userNo": 2
+    },
+    {
+      "id": "user2",
+      "password": "abcd1234",
+      "nickname": "호호",
+      "userNo": 3
+    },
+    {
+      "id": "ggg",
+      "nickname": "ggg",
+      "password": "ggg",
+      "userNo": 4
+    },
+    {
+      "id": "LgxkH87",
+      "nickname": "",
+      "password": ""
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "name": "바보",
+      "memberCount": 2
+    },
+    {
+      "id": 2,
+      "name": "잼얘기",
+      "memberCount": 1
+    },
+    {
+      "id": 4,
+      "name": "미쳤니",
+      "memberCount": 0
+    },
+    {
+      "name": "ㅁㅇㄴㄹ",
+      "id": 6
+    },
+    {
+      "name": "오케이",
+      "id": 7
+    },
+    {
+      "name": "그룹생성",
+      "id": 8
+    },
+    {
+      "name": "추가하자",
+      "id": 9
+    },
+    {
+      "name": "모꿀",
+      "id": 10
+    },
+    {
+      "name": "ㅁㅁ",
+      "id": 11
+    }
+  ],
+  "groupMembers": [
+    {
+      "id": 102,
+      "groupId": 1,
+      "userNo": 2,
+      "nickname": "꿀꿀"
+    },
+    {
+      "id": 103,
+      "groupId": 1,
+      "userNo": 3,
+      "nickname": "우야노!"
+    },
+    {
+      "id": 201,
+      "groupId": 2,
+      "userNo": 3,
+      "nickname": "호호"
+    }
+  ],
+  "storage": [
+    {
+      "id": 1,
+      "name": "디자인 레퍼런스",
+      "groupNo": 1
+    },
+    {
+      "id": 2,
+      "name": "개발 문서",
+      "groupNo": 1
+    },
+    {
+      "name": "맛집2",
+      "id": 3
+    },
+    {
+      "name": "야호~",
+      "groupNo": null,
+      "id": 4
+    },
+    {
+      "name": "ㅁㅇㄴㄹ",
+      "groupNo": null,
+      "id": 5
+    },
+    {
+      "name": "🥹",
+      "groupNo": null,
+      "id": 19
+    },
+    {
+      "name": "dkdk",
+      "groupNo": null,
+      "id": 20
+    },
+    {
+      "name": "만들기-1",
+      "id": 21
+    },
+    {
+      "name": "만들기",
+      "groupNo": 1,
+      "id": 23
+    },
+    {
+      "name": "아이디22222",
+      "id": 24
+    },
+    {
+      "name": "dd",
+      "groupNo": null,
+      "id": 28
+    },
+    {
+      "name": "바보",
+      "groupNo": null,
+      "id": 29
+    },
+    {
+      "name": "aa",
+      "groupNo": null,
+      "id": 30
+    },
+    {
+      "name": "aa",
+      "groupNo": null,
+      "id": 31,
+      "userNo": 1
+    },
+    {
+      "name": "만들자",
+      "groupNo": 6,
+      "id": 32,
+      "userNo": 1
+    },
+    {
+      "name": "하하",
+      "groupNo": null,
+      "id": 33
+    },
+    {
+      "name": "ㅁㅁㅁ",
+      "groupNo": null,
+      "id": 34
+    },
+    {
+      "name": "ㅁㅁ",
+      "groupNo": null,
+      "id": 37
+    },
+    {
+      "name": "aa",
+      "groupNo": null,
+      "id": 38
+    },
+    {
+      "name": "a",
+      "groupNo": null,
+      "id": 39
+    },
+    {
+      "name": "ㅁㄴㅇㄹ",
+      "groupNo": null,
+      "id": 40
+    },
+    {
+      "name": "ㅁㅁ",
+      "groupNo": null,
+      "id": 41
+    },
+    {
+      "name": "aa",
+      "groupNo": 8,
+      "id": 43
+    },
+    {
+      "name": "ㅁㅁㅁㅁ",
+      "groupNo": 9,
+      "id": 44
+    },
+    {
+      "name": "ㅁㅁ",
+      "groupNo": 1,
+      "id": 45
+    },
+    {
+      "name": "123",
+      "groupNo": 1,
+      "id": 46
+    },
+    {
+      "name": "ㅂㅈㄷㅂㅈㄷㅂ",
+      "groupNo": 1,
+      "id": 47
+    },
+    {
+      "name": "ㅂㅈㄷㅈㅂㄷ",
+      "groupNo": 1,
+      "id": 48
+    },
+    {
+      "name": "ㅂㅈㄷㅂ",
+      "groupNo": 1,
+      "id": 49
+    },
+    {
+      "name": "ㅂㅈㄷㅂㅈㄷ",
+      "groupNo": 1,
+      "id": 50
+    }
+  ],
+  "tips": [
+    {
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "id": 2
+    },
+    {
+      "no": 5,
+      "id": 5,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "꿀꿀",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 1
+    },
+    {
+      "no": 6,
+      "id": 6,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 2
+    },
+    {
+      "no": 8,
+      "id": 8,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/코어박살.jpg",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 3
+    },
+    {
+      "no": 9,
+      "id": 9,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 4
+    },
+    {
+      "no": 10,
+      "id": 10,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/코어박살.jpg",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 5
+    },
+    {
+      "no": 11,
+      "id": 11,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 6
+    },
+    {
+      "no": 12,
+      "id": 12,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z",
+      "userNo": 7
+    }
+  ],
+  "tipDrafts": [],
+  "login": [
+    {
+      "id": "user1",
+      "password": "qwer1234!",
+      "no": 1
+    },
+    {
+      "id": "ggg",
+      "password": "ggg"
+    },
+    {
+      "id": "testuser",
+      "password": "1234pass"
+    }
+  ],
+  "__noop": [
+    {
+      "tipId": 10,
+      "storageId": 1,
+      "no": 1
+    },
+    {
+      "tipId": 10,
+      "storageId": 2,
+      "no": 2
+    },
+    {
+      "tipId": 9,
+      "storageId": 1,
+      "no": 3
+    },
+    {
+      "tipId": 11,
+      "storageId": 3,
+      "no": 4
+    },
+    {
+      "tipId": 11,
+      "storageId": 3,
+      "no": 5
+    },
+    {
+      "tipId": 12,
+      "storageId": 2,
+      "no": 6
+    },
+    {
+      "tipId": 9,
+      "storageId": 19,
+      "no": 7
+    },
+    {
+      "tipId": 11,
+      "storageId": 5,
+      "no": 8
+    },
+    {
+      "tipId": 6,
+      "storageId": 1,
+      "no": 9
+    },
+    {
+      "tipId": 5,
+      "storageId": 3,
+      "no": 10
+    },
+    {
+      "tipId": 9,
+      "storageId": 1,
+      "no": 11
+    },
+    {
+      "tipId": 9,
+      "storageId": 4,
+      "no": 12
+    },
+    {
+      "tipId": 9,
+      "storageId": 4,
+      "no": 13
+    },
+    {
+      "tipId": 8,
+      "storageId": 4,
+      "no": 14
+    },
+    {
+      "tipId": 9,
+      "storageId": 4,
+      "no": 15
+    },
+    {
+      "tipId": 11,
+      "storageId": 3,
+      "no": 16
+    }
+  ],
+  "bookmarkRankingWeekly": [
+    {
+      "tipId": 12,
+      "title": "여름 휴가 국내 여행지 추천",
+      "thumbnailUrl": "/img/코어박살.jpg",
+      "nickname": "여행가모모",
+      "tags": [
+        "여행",
+        "국내여행",
+        "여름휴가"
+      ],
+      "weeklyBookmarkCount": 25
+    },
+    {
+      "tipId": 15,
+      "title": "집에서 쉽게 만드는 파스타",
+      "thumbnailUrl": "/img/1bee.png",
+      "nickname": "요리왕모모",
+      "tags": [
+        "요리",
+        "자취",
+        "파스타"
+      ],
+      "weeklyBookmarkCount": 18
+    },
+    {
+      "tipId": 7,
+      "title": "에어컨 전기세 아끼는 법",
+      "thumbnailUrl": "/img/꿀병2.png",
+      "nickname": "절약왕모모",
+      "tags": [
+        "에어컨",
+        "에너지절약",
+        "여름"
+      ],
+      "weeklyBookmarkCount": 16
+    },
+    {
+      "tipId": 22,
+      "title": "장마철 빨래 냄새 없애기",
+      "thumbnailUrl": "/img/honey.png",
+      "nickname": "생활꿀팁모모",
+      "tags": [
+        "세탁",
+        "장마",
+        "탈취"
+      ],
+      "weeklyBookmarkCount": 14
+    },
+    {
+      "tipId": 30,
+      "title": "카카오맵으로 숨은 맛집 찾기",
+      "thumbnailUrl": "/img/honey.png",
+      "nickname": "맛집모모",
+      "tags": [
+        "맛집",
+        "지도",
+        "팁"
+      ],
+      "weeklyBookmarkCount": 12
+    }
+  ],
+  "profiles": [
+    {
+      "id": 1,
+      "userNo": 1,
+      "loginId": "testuser",
+      "nickname": "꿀꿀2",
+      "profileImageUrl": "/uploads/default_profile.png",
+      "followerCount": 12,
+      "followingCount": 4,
+      "totalBookmarkCount": 30
+    },
+    {
+      "id": 2,
+      "userNo": 2,
+      "loginId": "user1",
+      "nickname": "꿀꿀",
+      "profileImageUrl": "/uploads/default_profile.png",
+      "followerCount": 12,
+      "followingCount": 4,
+      "totalBookmarkCount": 30
+    },
+    {
+      "id": 3,
+      "userNo": 3,
+      "loginId": "user2",
+      "nickname": "호호",
+      "profileImageUrl": "/uploads/default_profile.png",
+      "followerCount": 3,
+      "followingCount": 7,
+      "totalBookmarkCount": 9
+    },
+    {
+      "id": 4,
+      "userNo": 4,
+      "loginId": "ggg",
+      "nickname": "호호",
+      "profileImageUrl": "/uploads/default_profile.png",
+      "followerCount": 10,
+      "followingCount": 22,
+      "totalBookmarkCount": 9
+    }
+  ],
+  "followers": [
+    {
+      "userNo": 1,
+      "nickname": "testuser2",
+      "profileImageUrl": "/uploads/profile2.jpg",
+      "isFollowing": true
+    },
+    {
+      "id": 4,
+      "userNo": 3,
+      "nickname": "momo_lover",
+      "profileImageUrl": "/uploads/default_profile.png",
+      "isFollowing": false
+    }
+  ],
+  "followings": [
+    {
+      "userNo": 5,
+      "nickname": "travel_holic",
+      "profileImageUrl": "/uploads/profile5.jpg",
+      "isFollowing": false
+    },
+    {
+      "userNo": 8,
+      "nickname": "coding_master",
+      "profileImageUrl": "/uploads/profile8.png",
+      "isFollowing": true
+    }
+  ],
+  "usersAll": [
+    {
+      "userNo": 1,
+      "nickname": "testuser1",
+      "profileImageUrl": "/uploads/a1b2c3d4.jpg"
+    },
+    {
+      "userNo": 2,
+      "nickname": "testuser2",
+      "profileImageUrl": "/uploads/default_profile.png"
+    },
+    {
+      "userNo": 3,
+      "nickname": "momo_lover",
+      "profileImageUrl": "/uploads/e5f6g7h8.png"
+    }
+  ],
+  "storageTips": [
+    {
+      "storageId": 1,
+      "no": 10,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 5,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/코어박살.jpg",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 2,
+      "no": 10,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 5,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/코어박살.jpg",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 1,
+      "no": 9,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 4,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 3,
+      "no": 11,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 6,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 3,
+      "no": 11,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 6,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 2,
+      "no": 12,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 7,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 19,
+      "no": 9,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 4,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 5,
+      "no": 11,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 6,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 1,
+      "no": 6,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 2,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 3,
+      "no": 5,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 1,
+      "nickname": "꿀꿀",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 1,
+      "no": 9,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 4,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 4,
+      "no": 9,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 4,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 4,
+      "no": 8,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 3,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/코어박살.jpg",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 4,
+      "no": 9,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 4,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "storageId": 3,
+      "no": 11,
+      "title": "첫 꿀팁",
+      "contentSummary": "요약...",
+      "url": "https://example.com",
+      "userNo": 6,
+      "nickname": "테스트",
+      "thumbnailUrl": "/img/1bee.png",
+      "isPublic": true,
+      "tags": [
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1",
+        "태그1"
+      ],
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-01T00:00:00Z"
+    }
+  ],
+  "uploads": []
+}

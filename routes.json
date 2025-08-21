@@ -1,0 +1,52 @@
+{
+  "/api/storage": "/storage",
+  "/api/storage/:id": "/storage/:id",
+
+  "/api/query/storage/user/:userNo": "/storage",
+  "/api/query/storage/:userNo": "/storage",
+
+  "/api/query/storage/detail/:storageNo": "/storageTips?storageId=:storageNo",
+
+  "/api/query/storage/group/:groupId": "/storage?groupNo=:groupId",
+
+  "/api/groups/check": "/groups",
+  "/api/groups": "/groups",
+  "/api/groups/:groupId": "/groups/:groupId",
+  "/api/groups/:groupId/members": "/groupMembers?groupId=:groupId",
+  "/api/groups/:groupId/invite": "/__noop",
+  "/api/groups/:groupId/leave": "/__noop",
+
+  "/api/tips/save": "/__noop",
+  "/api/bookmark": "/__noop",
+
+  "/api/auth/signup": "/signup",
+  "/api/auth/check-nickname": "/signup",
+
+  "/api/query/tips/my": "/tips?userNo=1",
+
+  "/api/tips/generate": "/tipDrafts",
+  "/api/tips/register": "/tips",
+  "/api/tips/:id": "/tips/:id",
+  "/api/tips": "/tips",
+  "/api/tips/public": "/tips?isPublic=true",
+  "/api/query/tips/all": "/tips?isPublic=true",
+  "/api/query/tips/:tipId": "/tips/:tipId",
+
+  "/api/bookmark/ranking/weekly": "/bookmarkRankingWeekly",
+
+  "/api/profile/:userNo": "/profiles/:userNo",
+  "/api/profile": "/profiles/1",
+  "/api/profile/image": "/uploads",
+
+  "/api/follow/followers": "/followers",
+  "/api/follow/followings": "/followings",
+  "/api/follow/:userNo": "/followers/:userNo",
+
+  "/api/users/all": "/usersAll",
+  "/api/query/storage/:storageNo": "/storageTips?storageId=:storageNo",
+  "/api/auth/login": "/__noop",
+
+  "/api/follow/:userNo/followers": "/followers?userNo=:userNo",
+  "/api/follow/:userNo/followings": "/followings?userNo=:userNo",
+  "/api/query/tips/user/:userNo": "/tips?userNo=:userNo"
+}
