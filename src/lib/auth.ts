@@ -3,7 +3,7 @@ import { apiRequest } from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 /* ==================== 상수/설정 ==================== */
-const isMock = process.env.NEXT_PUBLIC_API_MOCK === "true";
+const isMock = process.env.NEXT_PUBLIC_API_MOCK === "false";
 
 /* ==================== 타입 ==================== */
 // 공개 응답 타입
@@ -93,29 +93,31 @@ export const logout = async (accessToken: string): Promise<EmptyResponse> => {
 
 /* ----- Read (중복 검사: mock) ----- */
 // 아이디 중복 검사 (mock)
-export const checkIdDuplicateMock = async (id: string): Promise<boolean> => {
-  const response = await apiRequest<{ id: string }[]>("GET", "/signup", {
-    params: { id },
-  });
-  return response.length > 0; // true = 중복
-};
+// export const checkIdDuplicateMock = async (id: string): Promise<boolean> => {
+//   const response = await apiRequest<{ id: string }[]>("GET", "/signup", {
+//     params: { id },
+//   });
+//   return response.length > 0; // true = 중복
+// };
 
 // 닉네임 중복 검사 (mock)
-export const checkNicknameDuplicateMock = async (
-  nickname: string
-): Promise<boolean> => {
-  const response = await apiRequest<{ nickname: string }[]>("GET", "/signup", {
-    params: { nickname },
-  });
-  return response.length > 0;
-};
+// export const checkNicknameDuplicateMock = async (
+//   nickname: string
+// ): Promise<boolean> => {
+//   const response = await apiRequest<{ nickname: string }[]>("GET", "/signup", {
+//     params: { nickname },
+//   });
+//   return response.length > 0;
+// };
 
-// 아이디 중복 검사 (real)
+// 아이디 중복 검사
 export const checkIdDuplicate = async (id: string): Promise<boolean> => {
   const res = await apiRequest<{ exists: boolean }>(
     "GET",
     "/api/auth/check-id",
-    { params: { id } }
+    {
+      params: { id },
+    }
   );
   return res.exists;
 };

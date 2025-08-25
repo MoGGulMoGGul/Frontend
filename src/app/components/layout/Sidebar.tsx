@@ -11,8 +11,8 @@ import { logout } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useGroupStore } from "@/stores/useGroupStorageStore";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
-import { useEnsureUserStoragesLoaded } from "@/hook/useEnsureUserStoragesLoaded";
-import { useEnsureGroupsLoaded } from "@/hook/useEnsureGroupsLoaded";
+import { useEnsureUserStoragesLoaded } from "@/hooks/useEnsureUserStoragesLoaded";
+import { useEnsureGroupsLoaded } from "@/hooks/useEnsureGroupsLoaded";
 import CommonModal from "../modal/CommonModal";
 import OkBtn from "../common/OkBtn";
 

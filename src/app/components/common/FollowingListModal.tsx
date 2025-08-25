@@ -1,4 +1,3 @@
-// app/components/common/FollowingListModal.tsx
 "use client";
 
 import { useEffect, useState } from "react";

@@ -1,15 +1,26 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 1) Font (Pretendard) */
+@font-face {
+  font-family: "Pretendard-Regular";
+  src: url("https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff")
+    format("woff");
+  font-weight: 400;
+  font-style: normal;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 2) Root variables */
+:root {
+  --spacing: 0.25rem;
+  --background: #ffffff;
+  --foreground: #171717;
+  --color-gray-light: #ededed;
+
+  /* 색 토큰 원본값 (테마에서 참조) */
+  --color-honey: #e89b16;
+  --color-honey-light: #f6c032;
+  --color-honey-pale: #f9d976;
+  --color-honey-pastel: #fff3b0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +30,82 @@
   }
 }
 
+/* 3) Tailwind v4 tokens */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-honey: var(--color-honey);
+  --color-honey-light: var(--color-honey-light);
+  --color-honey-pale: var(--color-honey-pale);
+  --color-honey-pastel: var(--color-honey-pastel);
+
+  --font-sans: Pretendard-Regular, Arial, Helvetica, sans-serif;
+}
+
+/* 4) Base */
+html,
+body {
+  height: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* 5) Custom controls */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d9d9d9;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+input[type="radio"]:checked {
+  border-color: var(--color-honey-pale);
+}
+
+input[type="radio"]::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: #d9d9d9;
+  border-radius: 50%;
+}
+
+input[type="radio"]:checked::before {
+  background-color: var(--color-honey-pale);
+}
+
+/* 6) Scrollbar 숨김 유틸 */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 7) Hex 유틸 */
+@layer utilities {
+  .hex {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+  .hex-ar {
+    aspect-ratio: 1.15 / 1;
+  }
+  .hex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
 }

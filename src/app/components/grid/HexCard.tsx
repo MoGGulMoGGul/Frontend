@@ -9,7 +9,7 @@ import Tooltip from "../common/Tooltip";
 import { saveBookMarkTip } from "@/lib/tips";
 
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
-import { useEnsureUserStoragesLoaded } from "@/hook/useEnsureUserStoragesLoaded";
+import { useEnsureUserStoragesLoaded } from "@/hooks/useEnsureUserStoragesLoaded";
 
 type ColorSet = { bg: string; border: string };
 

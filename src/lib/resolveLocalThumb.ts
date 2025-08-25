@@ -9,7 +9,7 @@ const toPublicPath = (s: string) => (s.startsWith("/") ? s : `/${s}`); // /publi
 // 로컬 썸네일 경로를 안전하게 변환 (data:, http(s):는 그대로, 그 외엔 /prefix)
 export function resolveLocalThumb(
   url?: string | null,
-  fallback = "/img/코어박살.jpg"
+  fallback = "/img/1bee.jpg"
 ): string {
   if (isEmpty(url)) return fallback;
 

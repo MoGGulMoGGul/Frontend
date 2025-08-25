@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import ModalCancelBtn from "./ModalCancelBtn";
 import TagList from "../common/TagList";
 import OkBtn from "../common/OkBtn";
-import CommonModal from "../modal/CommonModal";
+import CommonModal from "./CommonModal";
 import { getTipDetail, deleteTip, type TipDetail } from "@/lib/tips";
 import { extractApiErrorMessage } from "@/lib/error";
 import { resolveLocalThumb } from "@/lib/resolveLocalThumb";

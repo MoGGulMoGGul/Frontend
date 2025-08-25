@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { createTipDraft, registerTip, TipDraftResponse } from "@/lib/tips";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useEnsureUserStoragesLoaded } from "@/hook/useEnsureUserStoragesLoaded";
+import { useEnsureUserStoragesLoaded } from "@/hooks/useEnsureUserStoragesLoaded";
 import BoldLabeledField from "../components/form/BoldLabeledInput";
 import CommonModal from "../components/modal/CommonModal";
 import OkBtn from "../components/common/OkBtn";

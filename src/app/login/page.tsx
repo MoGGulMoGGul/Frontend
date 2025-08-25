@@ -104,13 +104,19 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center flex-col h-screen">
       <div className="w-[500px] border border-[#d9d9d9] rounded-xl p-6">
-        <div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
           <div className="flex flex-col mb-6">
             <LabeledInput
               label="아이디 및 이메일"
               name="id"
               value={form.id}
               onChange={handleChange}
+              autoComplete="username"
             />
             <LabeledInput
               label="비밀번호"
@@ -118,10 +124,12 @@ export default function Login() {
               name="password"
               value={form.password}
               onChange={handleChange}
+              autoComplete="current-password"
             />
           </div>
+          {/* 버튼은 기존 그대로 (onClick 유지) */}
           <YellowLBtn label="로그인하기" onClick={handleLogin} />
-        </div>
+        </form>
 
         <div className="flex items-center justify-center text-sm font-medium hover:cursor-pointer mb-16">
           <Link href="/signup" className="hover:font-semibold">
@@ -144,7 +152,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* 공통 모달 */}
+      {/* 공통 모달 (그대로) */}
       {showModal && (
         <CommonModal>
           {modalType === "findId" && (
@@ -214,7 +222,9 @@ export default function Login() {
               <p className={`text-sm text-center ${messageClass}`}>
                 {modalMessage}
               </p>
-              <ModalCancelBtn label="닫기" onClose={closeModal} />
+              <div className="flex justify-center">
+                <ModalCancelBtn label="닫기" onClose={closeModal} />
+              </div>
             </div>
           )}
         </CommonModal>

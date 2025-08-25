@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig, Method } from "axios";
 
 /* ==================== 상수/설정 ==================== */
 const baseInstance = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: "",
   timeout: 5000,
 });
 

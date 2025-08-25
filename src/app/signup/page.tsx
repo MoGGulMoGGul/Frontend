@@ -6,11 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CommonModal from "../components/modal/CommonModal";
 import ModalCancelBtn from "../components/modal/ModalCancelBtn";
-import {
-  signup,
-  checkIdDuplicateMock,
-  checkNicknameDuplicateMock,
-} from "@/lib/auth";
+import { signup, checkIdDuplicate, checkNicknameDuplicate } from "@/lib/auth";
 
 export default function SignUp() {
   const router = useRouter();
@@ -50,7 +46,7 @@ export default function SignUp() {
     }
 
     try {
-      const exists = await checkIdDuplicateMock(form.id);
+      const exists = await checkIdDuplicate(form.id);
       if (exists) {
         setCheckModal("이미 사용 중인 아이디입니다. ❌");
       } else {
@@ -68,7 +64,7 @@ export default function SignUp() {
     }
 
     try {
-      const exists = await checkNicknameDuplicateMock(form.nickname);
+      const exists = await checkNicknameDuplicate(form.nickname);
       if (exists) {
         setCheckModal("이미 사용 중인 닉네임입니다. ❌");
       } else {
