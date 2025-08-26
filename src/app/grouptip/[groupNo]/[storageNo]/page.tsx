@@ -13,7 +13,7 @@ import {
   updateStorageName,
   deleteStorage,
   getStorageTips,
-  type TipSearchItem as StorageTipItem, // from lib/storage.ts
+  type TipSearchItem as StorageTipItem,
 } from "@/lib/storage";
 
 type RouteParams = { groupNo: string; storageNo: string };

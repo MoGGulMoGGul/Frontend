@@ -60,6 +60,15 @@ function Sidebar() {
   }, [pathname, userNo]);
 
   useEffect(() => {
+    if (pathname === "/grouptip" || pathname.startsWith("/grouptip/")) {
+      useGroupStore
+        .getState()
+        .load(true)
+        .catch(() => {});
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     if (!hasHydrated) return;
     if (userNo && !nickname) {
       loadUserProfile(userNo).catch(() => {});

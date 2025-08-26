@@ -22,6 +22,7 @@ export default function GrouptipPage() {
   const load = useGroupStore((s) => s.load);
   const create = useGroupStore((s) => s.create);
 
+  const [creating, setCreating] = useState(false);
   const [infoModal, setInfoModal] = useState<null | { message: string }>(null);
   const openInfo = (message: string) => setInfoModal({ message });
 
@@ -30,12 +31,14 @@ export default function GrouptipPage() {
   }, [load]);
 
   const handleCreateGroup = async () => {
+    if (creating) return;
     const name = form.name.trim();
     if (!name) {
       openInfo("그룹 이름을 입력해주세요.");
       return;
     }
     try {
+      setCreating(true);
       const created = await create(name);
       setIsModalOpen(false);
       setForm({ name: "" });
@@ -43,6 +46,8 @@ export default function GrouptipPage() {
     } catch (err) {
       console.error(err);
       openInfo("그룹 생성에 실패했습니다.");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -72,20 +77,27 @@ export default function GrouptipPage() {
 
       {isModalOpen && (
         <CommonModal>
-          <p className="text-center">그룹의 이름을 입력해주세요</p>
-          <LabeledInput
-            name="name"
-            value={form.name}
-            onChange={(e) => setForm({ name: e.target.value })}
-            placeholder="그룹 이름을 입력하세요"
-          />
-          <div className="flex justify-center gap-2 pt-4">
-            <OkBtn label="벌집생성하기" onClick={handleCreateGroup} />
-            <ModalCancelBtn
-              label="취소하기"
-              onClose={() => setIsModalOpen(false)}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateGroup();
+            }}
+          >
+            <p className="text-center">그룹의 이름을 입력해주세요</p>
+            <LabeledInput
+              name="name"
+              value={form.name}
+              placeholder="그룹 이름을 입력하세요"
+              onChange={(e) => setForm({ name: e.target.value })}
             />
-          </div>
+            <div className="flex justify-center gap-2 pt-4">
+              <OkBtn label="벌집생성하기" onClick={handleCreateGroup} />
+              <ModalCancelBtn
+                label="취소하기"
+                onClose={() => setIsModalOpen(false)}
+              />
+            </div>
+          </form>
         </CommonModal>
       )}
 

@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import CommonModal from "./CommonModal";
 import { updateProfile } from "@/lib/user";
 import { extractApiErrorMessage } from "@/lib/error";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 type Props = {
   onClose: () => void;
@@ -32,8 +33,10 @@ export default function UserEditModal({
   const hasChanges = changedNickname || changedImage;
 
   const previewUrl = useMemo(() => {
+    // 파일 선택 시는 blob: URL 그대로 사용
     if (file) return URL.createObjectURL(file);
-    return initialImageUrl || "/img/1bee.png";
+    // 초기 URL은 /, http(s), data: 등 안전하게 보정
+    return resolveLocalThumb(initialImageUrl, "/img/1bee.png");
   }, [file, initialImageUrl]);
 
   const handlePickImage = () => fileInputRef.current?.click();
@@ -85,6 +88,7 @@ export default function UserEditModal({
               alt="프로필 이미지"
               fill
               className="object-cover"
+              unoptimized={!!file}
             />
           </button>
           <input

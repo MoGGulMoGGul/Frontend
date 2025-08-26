@@ -118,6 +118,7 @@ export default function SignUp() {
               value={form.id}
               onChange={handleChange}
               placeholder="아이디를 입력하세요"
+              autoComplete="off"
             />
           </div>
 
@@ -128,6 +129,7 @@ export default function SignUp() {
             value={form.password}
             onChange={handleChange}
             placeholder="비밀번호 입력"
+            autoComplete="new-password"
           />
           <LabeledInput
             label="비밀번호 확인"
@@ -136,6 +138,7 @@ export default function SignUp() {
             value={form.passwordCheck}
             onChange={handleChange}
             placeholder="비밀번호 재입력"
+            autoComplete="new-password"
           />
           {form.passwordCheck.length > 0 && (
             <div

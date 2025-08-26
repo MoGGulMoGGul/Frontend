@@ -17,6 +17,7 @@ import FollowingListModal from "../components/common/FollowingListModal";
 
 // 로컬스토리지(퍼시스트)에서 유저/프로필을 읽어오기
 import { useAuthStore } from "@/stores/useAuthStore";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function MytipPage() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function MytipPage() {
             <div className="flex items-center">
               <div className="relative w-24 h-24 rounded-full bg-gray-300 mr-2 overflow-hidden">
                 <Image
-                  src={profileImageUrl || "/img/1bee.png"}
+                  src={resolveLocalThumb(profileImageUrl, "/img/1bee.png")}
                   alt="프로필 이미지"
                   fill
                   className="object-cover"

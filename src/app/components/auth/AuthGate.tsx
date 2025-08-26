@@ -11,21 +11,25 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const accessToken = useAuthStore((s) => s.accessToken);
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
 
   const isPublic = useMemo(() => {
     if (!pathname) return true;
     return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p));
   }, [pathname]);
 
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(isPublic);
 
   useEffect(() => {
+    if (!hasHydrated) return;
+
     // 비로그인 & 비공개 경로 → 로그인으로
     if (!accessToken && !isPublic) {
       const next = `${pathname}${
         searchParams?.toString() ? `?${searchParams}` : ""
       }`;
       router.replace(`/login?next=${encodeURIComponent(next)}`);
+      setReady(true);
       return;
     }
     // 로그인했는데 로그인 페이지에 있으면 → next 또는 홈
@@ -35,7 +39,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
     setReady(true);
-  }, [accessToken, isPublic, pathname, searchParams, router]);
+  }, [accessToken, isPublic, pathname, searchParams, router, hasHydrated]);
 
   if (!ready && !isPublic) {
     return (

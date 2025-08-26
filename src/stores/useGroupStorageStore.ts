@@ -87,6 +87,7 @@ export const useGroupStore = create<State & Actions>()(
             groups: s.groups.map((g) => (g.groupNo === tempId ? swapped : g)),
             error: null,
           }));
+          await get().load(true);
           return swapped;
         } catch (e: unknown) {
           // 롤백
@@ -116,6 +117,7 @@ export const useGroupStore = create<State & Actions>()(
         try {
           await updateGroupName(groupNo, { name: trimmed });
           set({ error: null });
+          await get().load(true);
         } catch (e: unknown) {
           // 롤백
           set({ groups: backup, error: errorToMessage(e, "그룹명 변경 실패") });
@@ -136,6 +138,7 @@ export const useGroupStore = create<State & Actions>()(
         try {
           await leaveGroup(groupNo);
           set({ error: null });
+          await get().load(true);
         } catch (e: unknown) {
           // 롤백
           set({ groups: backup, error: errorToMessage(e, "그룹 나가기 실패") });

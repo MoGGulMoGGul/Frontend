@@ -27,11 +27,18 @@ import {
 
 import SearchBar from "@/app/components/common/SearchBar";
 
+// 스토어/하이드레이션 사용
+import { useGroupStore } from "@/stores/useGroupStorageStore";
+import { useAuthStore } from "@/stores/useAuthStore";
+
 export default function GrouptipGroupPage() {
   const router = useRouter();
   const params = useParams<{ groupNo: string }>();
-  const groupNo = Number(params.groupNo);
+  const groupNo = Number(params?.groupNo ?? NaN);
   const isValidParams = Number.isFinite(groupNo);
+
+  // 토큰/스토어 하이드레이션 대기
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
 
   // 보관함 생성 모달
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,9 +67,13 @@ export default function GrouptipGroupPage() {
   const [storages, setStorages] = useState<GroupStorageItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* ---- 헤더 로딩 ---- */
+  /* ---- 헤더 로딩 (그룹명) ---- */
   useEffect(() => {
     let alive = true;
+
+    // 하이드레이션 완료 전에는 아무 것도 안 함
+    if (!hasHydrated) return;
+
     (async () => {
       try {
         if (!isValidParams) {
@@ -72,6 +83,29 @@ export default function GrouptipGroupPage() {
           }
           return;
         }
+
+        // 스토어 캐시 우선 사용
+        const store1 = useGroupStore.getState();
+        const cached = store1.groups.find((g) => g.groupNo === groupNo);
+        if (cached) {
+          if (!alive) return;
+          setGroupName(cached.name);
+          setHeaderLoading(false);
+          return;
+        }
+
+        // 스토어 강제 로드 후 재확인
+        await store1.load(true);
+        if (!alive) return;
+        const store2 = useGroupStore.getState();
+        const fromStore = store2.groups.find((g) => g.groupNo === groupNo);
+        if (fromStore) {
+          setGroupName(fromStore.name);
+          setHeaderLoading(false);
+          return;
+        }
+
+        // 최후 수단: 직접 API 호출
         const list: GroupListItem[] = await getMyGroups();
         if (!alive) return;
         const found = list.find((g) => g.groupNo === groupNo);
@@ -85,14 +119,19 @@ export default function GrouptipGroupPage() {
         setHeaderLoading(false);
       }
     })();
+
     return () => {
       alive = false;
     };
-  }, [groupNo, isValidParams]);
+  }, [groupNo, isValidParams, hasHydrated]);
 
   /* ---- 보관함 목록 로딩 ---- */
   useEffect(() => {
     let alive = true;
+
+    // 하이드레이션 전이면 스킵(권한 필요 가능성)
+    if (!hasHydrated) return;
+
     (async () => {
       try {
         if (!isValidParams) {
@@ -115,7 +154,7 @@ export default function GrouptipGroupPage() {
     return () => {
       alive = false;
     };
-  }, [groupNo, isValidParams]);
+  }, [groupNo, isValidParams, hasHydrated]);
 
   /* ---- 보관함 생성 ---- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,7 +282,7 @@ export default function GrouptipGroupPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid justify-items-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(140px,1fr))]">
+                <div className="grid justify-items-center gap-4 [grid-template-columns:repeat(auto-fit,minmax(120px,1fr))]">
                   {storages.map((s) => (
                     <Link
                       key={s.storageNo}
@@ -272,7 +311,7 @@ export default function GrouptipGroupPage() {
                   {/* (+) 버튼을 같은 그리드에 포함 */}
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="w-11 h-11 rounded-full bg-[#d9d9d9] text-5xl grid place-items-center hover:cursor-pointer"
+                    className="col-span-full justify-self-center w-11 h-11 rounded-full bg-[#d9d9d9] text-5xl grid place-items-center hover:cursor-pointer mt-5"
                     aria-label="보관함 추가"
                   >
                     <span className="relative top-[-6px]">+</span>

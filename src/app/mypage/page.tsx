@@ -15,8 +15,9 @@ import ModalCancelBtn from "../components/modal/ModalCancelBtn";
 import SearchBar from "../components/common/SearchBar";
 import { getUserProfile, type UserProfile } from "@/lib/user";
 
-//  전역 보관함 스토어만 읽기(여기선 로드 X, 사이드바가 로드)
+// 전역 보관함 스토어(읽기 전용) + add 액션 사용
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function MyPage() {
   const router = useRouter();
@@ -44,11 +45,50 @@ export default function MyPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 보관함 생성 모달 & 입력 상태
+  const [showCreateStorage, setShowCreateStorage] = useState(false);
+  const [newStorageName, setNewStorageName] = useState("");
+  const [creating, setCreating] = useState(false);
+
   const openToast = (msg: string) => {
     setToastMsg(msg);
     setToastOpen(true);
   };
 
+  // add 액션
+  const addStorage = useUserStorageStore((s) => s.add);
+
+  // 보관함 생성 핸들러
+  const handleCreateStorage = async () => {
+    const name = newStorageName.trim();
+    if (!name) {
+      openToast("보관함 이름을 입력해 주세요.");
+      return;
+    }
+
+    if (typeof userNo !== "number") {
+      openToast("로그인이 필요합니다. 다시 로그인해 주세요.");
+      setShowCreateStorage(false);
+      setTimeout(() => router.push("/login"), 200);
+      return;
+    }
+
+    try {
+      setCreating(true);
+      const created = await addStorage(name);
+      setShowCreateStorage(false);
+      setNewStorageName("");
+      openToast("보관함이 생성되었습니다.");
+      router.push(`/mytip/${created.storageNo}`);
+    } catch (e) {
+      console.error(e);
+      openToast("보관함 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // 회원탈퇴
   const handleWithdrawal = async () => {
     if (!accessToken) {
       openToast("로그인이 필요합니다. 다시 로그인해 주세요.");
@@ -70,9 +110,9 @@ export default function MyPage() {
     }
   };
 
-  // userNo로 유저정보 조회 (userNo 유효할 때만 호출)
+  // userNo로 유저정보 조회
   useEffect(() => {
-    if (typeof userNo !== "number") return; // undefined/null이면 호출 안 함
+    if (typeof userNo !== "number") return;
     setLoading(true);
     getUserProfile(userNo)
       .then(setProfile)
@@ -98,7 +138,7 @@ export default function MyPage() {
     }
   };
 
-  //카드 데이터 (전역 스토어에서만 생성)
+  // 카드 데이터
   const personalFolders = useMemo(
     () => myStorages.map((s) => ({ id: s.storageNo, name: s.name })),
     [myStorages]
@@ -123,7 +163,10 @@ export default function MyPage() {
               <div className="flex items-center">
                 <div className="relative w-24 h-24 rounded-full bg-gray-300 mr-2 overflow-hidden">
                   <Image
-                    src={profile?.profileImageUrl || "/img/1bee.png"}
+                    src={resolveLocalThumb(
+                      profile?.profileImageUrl,
+                      "/img/1bee.png"
+                    )}
                     alt="프로필 이미지"
                     fill
                     className="object-cover"
@@ -151,8 +194,6 @@ export default function MyPage() {
 
               {/* 다른 유저들이 모아간 내 꿀팁 */}
               <div className="relative flex flex-col text-center pr-12">
-                {" "}
-                {/* ← 텍스트 오른쪽 여백 확보 */}
                 <div className="w-10 aspect-[2/3] absolute -top-6 right-[-10px] sm:right-0 md:right-[8px]">
                   <Image
                     src="/img/honeyjar.png"
@@ -170,7 +211,7 @@ export default function MyPage() {
                 </div>
               </div>
 
-              {/* 오른쪽: 팔로워 수 (참고코드처럼 이미지가 오른쪽 위에 겹쳐 보이도록) */}
+              {/* 오른쪽: 팔로워 수 */}
               <button
                 type="button"
                 onClick={() => setShowFollowerList(true)}
@@ -196,7 +237,7 @@ export default function MyPage() {
                 </div>
               </button>
 
-              {/* 맨 오른쪽: 회원탈퇴 버튼 (내용 유지) */}
+              {/* 회원탈퇴 버튼 */}
               <button
                 onClick={() => setShowWithdrawalModal(true)}
                 className="w-24 h-12 rounded-xl border border-[var(--color-honey-pale)] bg-white hover:bg-[var(--color-honey-pale)]"
@@ -255,9 +296,52 @@ export default function MyPage() {
           </main>
 
           {/* (+) 버튼 */}
-          <button className="w-11 h-11 rounded-full bg-[#d9d9d9] text-5xl grid place-items-center">
+          <button
+            className="w-11 h-11 rounded-full bg-[#d9d9d9] text-5xl grid place-items-center"
+            aria-label="개인 보관함 추가"
+            onClick={() => setShowCreateStorage(true)}
+          >
             <span className="relative top-[-6px]">+</span>
           </button>
+
+          {/* ────────────────────────── 모달들 ────────────────────────── */}
+          {/* 보관함 생성 모달 */}
+          {showCreateStorage && (
+            <CommonModal onClose={() => setShowCreateStorage(false)}>
+              <div className="w-full max-w-sm">
+                <h2 className="text-lg font-bold mb-4">
+                  새 개인 보관함 만들기
+                </h2>
+                <label className="block text-sm mb-2" htmlFor="storageName">
+                  보관함 이름
+                </label>
+                <input
+                  id="storageName"
+                  autoFocus
+                  type="text"
+                  value={newStorageName}
+                  onChange={(e) => setNewStorageName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCreateStorage();
+                    if (e.key === "Escape") setShowCreateStorage(false);
+                  }}
+                  className="w-full rounded-md border p-2"
+                  placeholder="예: 개발 북마크"
+                  disabled={creating}
+                />
+                <div className="mt-5 flex gap-2 justify-end">
+                  <ModalCancelBtn
+                    label="취소"
+                    onClose={() => setShowCreateStorage(false)}
+                  />
+                  <OkBtn
+                    label={creating ? "생성 중..." : "생성"}
+                    onClick={handleCreateStorage}
+                  />
+                </div>
+              </div>
+            </CommonModal>
+          )}
 
           {showUserEdit && profile && (
             <UserEditModal

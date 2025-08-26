@@ -1,9 +1,10 @@
 /* ==================== Imports ==================== */
 import axios, { AxiosRequestConfig, Method } from "axios";
+import { authHeader } from "@/lib/authHeader";
 
 /* ==================== 상수/설정 ==================== */
 const baseInstance = axios.create({
-  baseURL: "",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE,
   timeout: 5000,
 });
 
@@ -18,6 +19,7 @@ type ApiOptions = {
   params?: Record<string, string | number | boolean | null | undefined>;
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  auth?: boolean;
 };
 
 /* ==================== API 함수 ==================== */
@@ -36,6 +38,12 @@ export const apiRequest = async <T = unknown>(
     );
 
   const mergedHeaders: Record<string, string> = { ...(options?.headers || {}) };
+
+  if (options?.auth !== false) {
+    // 보호 API: 토큰이 없으면 예외를 그대로 던져서 조기에 차단
+    Object.assign(mergedHeaders, authHeader());
+  }
+
   const hasContentType = Object.keys(mergedHeaders).some(
     (k) => k.toLowerCase() === "content-type"
   );

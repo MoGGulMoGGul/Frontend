@@ -10,6 +10,7 @@ import { loginAndStore, findId, resetPassword } from "@/lib/auth";
 import CommonModal from "../components/modal/CommonModal";
 import ModalCancelBtn from "../components/modal/ModalCancelBtn";
 import OkBtn from "../components/common/OkBtn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function Login() {
   const router = useRouter();
@@ -59,6 +60,7 @@ export default function Login() {
 
       router.push("/");
     } catch (error) {
+      useAuthStore.getState().clearAuth();
       console.error("로그인 실패", error);
       setIsError(true);
       setModalMessage("아이디 또는 비밀번호를 다시 확인해주세요.");
@@ -177,7 +179,9 @@ export default function Login() {
                 </p>
               )}
               <YellowLBtn label="아이디 찾기" onClick={handleFindId} />
-              <ModalCancelBtn label="닫기" onClose={closeModal} />
+              <div className="flex justify-center">
+                <ModalCancelBtn label="닫기" onClose={closeModal} />
+              </div>
             </div>
           )}
 

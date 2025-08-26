@@ -192,7 +192,7 @@ export async function getMyTips(): Promise<MyTipItem[]> {
 
 // 전체 꿀팁 목록
 export async function getPublicTips(): Promise<PublicTipItem[]> {
-  return apiRequest<PublicTipItem[]>("GET", "/api/query/tips/all", {});
+  return apiRequest<PublicTipItem[]>("GET", "/api/query/tips/all");
 }
 
 // 꿀팁 상세

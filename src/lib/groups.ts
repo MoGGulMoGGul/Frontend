@@ -19,8 +19,10 @@ export type InviteGroupMemberRequest = { userLoginIds: string[] };
 type InviteAPIResponse = string[] | { message?: string | null }; // 방어적
 export type InviteGroupInviteResponse = string[];
 
+type BackendCreateGroupResp = { message: string; groupNo: number };
+
 /* ==================== 내부(raw) 타입 ==================== */
-type RawGroup = { id: number; name: string; memberCount: number };
+type RawGroup = { groupNo: number; name: string; memberCount: number };
 type RawGroupMember = { userNo: number; nickname: string };
 
 /* ==================== API: Groups ==================== */
@@ -28,12 +30,10 @@ type RawGroupMember = { userNo: number; nickname: string };
 export const createGroup = async (
   data: CreateGroupRequest
 ): Promise<CreateGroupResponse> => {
-  const created = await apiRequest<{ id: number; name: string }>(
-    "POST",
-    "/api/groups",
-    { headers: authHeader(), data }
-  );
-  return { message: "그룹 생성 완료!", groupNo: created.id };
+  const res = await apiRequest<BackendCreateGroupResp>("POST", "/api/groups", {
+    data,
+  });
+  return { message: res.message, groupNo: res.groupNo };
 };
 
 /* ----- Read (그룹 목록 조회) ----- */
@@ -42,7 +42,7 @@ export const getMyGroups = async (): Promise<GroupListItem[]> => {
     headers: authHeader(),
   });
   return raw.map((g) => ({
-    groupNo: g.id,
+    groupNo: g.groupNo,
     name: g.name,
     memberCount: g.memberCount,
   }));

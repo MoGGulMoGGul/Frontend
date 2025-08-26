@@ -7,12 +7,7 @@ export const authHeader = () => {
   const token = useAuthStore.getState().accessToken;
 
   if (!token) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ 개발 모드: accessToken 없음 → mock-token 사용");
-      return { Authorization: "Bearer mock-token" };
-    }
-    throw new Error("로그인이 필요합니다.");
+    throw new Error("액세스 토큰이 없습니다. 로그인 후 다시 시도해 주세요.");
   }
-
   return { Authorization: `Bearer ${token}` };
 };

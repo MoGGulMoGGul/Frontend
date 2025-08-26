@@ -66,6 +66,7 @@ export default function MenuItem({
   };
 
   const confirmAdd = async () => {
+    if (addLoading) return; // 재진입 가드
     const name = addName.trim();
     if (!name) return;
     try {
@@ -247,12 +248,14 @@ export default function MenuItem({
             </p>
             <div className="flex justify-end gap-2">
               <button
+                type="button"
                 onClick={() => setDeleteTargetId(null)}
                 className="px-4 h-10 rounded-md border border-gray-300 bg-white hover:bg-gray-100"
               >
                 취소
               </button>
               <button
+                type="button"
                 onClick={confirmDelete}
                 disabled={actionLoading}
                 className="px-4 h-10 rounded-md bg-red-500 text-white hover:opacity-90 disabled:opacity-60"
@@ -281,6 +284,7 @@ export default function MenuItem({
       {showArrow && isArrowUp && (
         <>
           <button
+            type="button"
             onClick={openAddModal}
             className="w-full h-9 rounded-lg border border-[var(--color-honey)] bg-[var(--color-honey-light)] mb-2"
           >
@@ -306,12 +310,14 @@ export default function MenuItem({
                 />
                 <div className="flex justify-end gap-2">
                   <button
+                    type="button"
                     onClick={() => setAddOpen(false)}
                     className="px-4 h-10 rounded-md border border-gray-300 bg-white hover:bg-gray-100"
                   >
                     취소
                   </button>
                   <button
+                    type="button"
                     onClick={confirmAdd}
                     disabled={addLoading || !addName.trim()}
                     className="px-4 h-10 rounded-md bg-[var(--color-honey)] text-white hover:opacity-90 disabled:opacity-60"
