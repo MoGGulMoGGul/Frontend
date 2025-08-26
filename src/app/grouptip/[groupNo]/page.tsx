@@ -19,7 +19,6 @@ import {
 import {
   getMyGroups,
   getGroupMembers,
-  inviteGroupMember,
   leaveGroup,
   GroupListItem,
   GroupMember,
@@ -30,6 +29,7 @@ import SearchBar from "@/app/components/common/SearchBar";
 // 스토어/하이드레이션 사용
 import { useGroupStore } from "@/stores/useGroupStorageStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import InviteMembersModal from "@/app/components/group/InviteMembersModal";
 
 export default function GrouptipGroupPage() {
   const router = useRouter();
@@ -55,8 +55,6 @@ export default function GrouptipGroupPage() {
 
   // 초대 관련 상태
   const [showInvite, setShowInvite] = useState(false);
-  const [inviteInput, setInviteInput] = useState<string>("");
-  const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteResult, setInviteResult] = useState<string | null>(null);
 
   // 그룹 나가기
@@ -372,73 +370,14 @@ export default function GrouptipGroupPage() {
         )}
 
         {showInvite && (
-          <CommonModal>
-            <div className="min-w-[360px]">
-              <h3 className="text-lg font-semibold mb-3 text-center">
-                멤버 초대
-              </h3>
-              <p className="text-sm text-gray-600 mb-2">
-                초대할 사용자 아이디를 콤마로 구분해 입력하세요. 예) 아이디1,
-                아이디2, 아이디3
-              </p>
-              <input
-                value={inviteInput}
-                onChange={(e) => setInviteInput(e.target.value)}
-                placeholder="예) 아이디1, 아이디2, 아이디3"
-                className="w-full border border-gray-300 rounded-md px-3 h-10 mb-4"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowInvite(false)}
-                  className="px-4 h-10 rounded-md border border-gray-300 bg-white hover:bg-gray-100"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={() => {
-                    if (inviteLoading) return;
-                    void (async () => {
-                      const userLoginIds = inviteInput
-                        .split(",")
-                        .map((t) => t.trim())
-                        .filter(Boolean);
-                      if (userLoginIds.length === 0) {
-                        setInviteResult("초대할 사용자 아이디를 입력하세요.");
-                        return;
-                      }
-                      try {
-                        setInviteLoading(true);
-                        const messages = await inviteGroupMember(groupNo, {
-                          userLoginIds,
-                        });
-                        const safe = (messages || []).filter(
-                          (m): m is string =>
-                            typeof m === "string" && m.length > 0
-                        );
-                        const hasFail = safe.some((m) => m.includes("실패"));
-                        setInviteResult(
-                          hasFail
-                            ? "일부 초대에 실패했습니다."
-                            : "초대가 완료되었습니다."
-                        );
-                        setShowInvite(false);
-                        setInviteInput("");
-                      } catch (e) {
-                        console.error("멤버 초대 실패:", e);
-                        setInviteResult("멤버 초대에 실패했습니다.");
-                      } finally {
-                        setInviteLoading(false);
-                      }
-                    })();
-                  }}
-                  disabled={inviteLoading}
-                  className="px-4 h-10 rounded-md bg-[var(--color-honey-light)] hover:opacity-90 disabled:opacity-60"
-                >
-                  초대
-                </button>
-              </div>
-            </div>
-          </CommonModal>
+          <InviteMembersModal
+            groupNo={groupNo}
+            onClose={() => setShowInvite(false)}
+            onInvited={(n) => {
+              setInviteResult(`초대 완료: ${n}명`);
+              setShowInvite(false);
+            }}
+          />
         )}
 
         {inviteResult && (

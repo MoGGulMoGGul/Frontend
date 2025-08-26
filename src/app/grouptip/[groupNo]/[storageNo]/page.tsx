@@ -9,7 +9,7 @@ import HexGridWithData from "@/app/components/grid/HexGridWithData";
 import { MYTIP_IMAGE_SLOTS } from "@/app/components/grid/TipImageSlots";
 
 import {
-  getStorageDetail,
+  getStoragesByGroup,
   updateStorageName,
   deleteStorage,
   getStorageTips,
@@ -51,14 +51,21 @@ export default function GrouptipStoragePage() {
     if (!Number.isFinite(groupNo) || !Number.isFinite(storageNo)) return;
 
     let alive = true;
+
+    // 헤더(보관함 이름)는 그룹 목록에서 찾기
     (async () => {
       try {
-        const detail = await getStorageDetail(storageNo);
+        const list = await getStoragesByGroup(groupNo);
         if (!alive) return;
-        setName(detail.name ?? "");
-        setErrorHeader(null);
+        const found = list.find((s) => s.storageNo === storageNo);
+        if (found) {
+          setName(found.name ?? "");
+          setErrorHeader(null);
+        } else {
+          setErrorHeader("보관함을 찾을 수 없거나 권한이 없습니다.");
+        }
       } catch (e) {
-        console.error("보관함 상세 조회 실패:", e);
+        console.error("보관함 헤더 조회 실패:", e);
         if (!alive) return;
         setErrorHeader("보관함을 불러오지 못했습니다.");
       } finally {
@@ -67,6 +74,7 @@ export default function GrouptipStoragePage() {
       }
     })();
 
+    // 본문(꿀팁 목록)은 그대로 유지: /api/query/storage/:storageNo
     (async () => {
       try {
         const tips = await getStorageTips(storageNo);

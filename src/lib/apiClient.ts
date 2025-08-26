@@ -1,34 +1,131 @@
 /* ==================== Imports ==================== */
-import axios, { AxiosRequestConfig, Method } from "axios";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  Method,
+  AxiosHeaders,
+} from "axios";
 import { authHeader } from "@/lib/authHeader";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-/* ==================== 상수/설정 ==================== */
+/* ==================== 타입/유틸 ==================== */
+// 내부적으로만 쓰는 확장 컨피그(퍼블릭 요청 표시용)
+interface InternalAxiosRequestConfig<D = unknown>
+  extends AxiosRequestConfig<D> {
+  /** 퍼블릭 엔드포인트: Authorization 자동 부착 금지 */
+  __skipAuth?: boolean;
+}
+
+/** POJO 헤더를 AxiosHeaders로 변환 (RawAxiosHeaders 미사용) */
+type DictHeaders = Record<string, string | number | boolean>;
+function ensureAxiosHeaders(h?: AxiosRequestConfig["headers"]): AxiosHeaders {
+  if (!h) return new AxiosHeaders();
+  if (h instanceof AxiosHeaders) return h;
+  if (typeof h === "string") return AxiosHeaders.from(h); // 드물지만 지원
+  return AxiosHeaders.from(h as DictHeaders);
+}
+
+/* ==================== 인스턴스 ==================== */
 const baseInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE,
   timeout: 5000,
 });
 
-// 브라우저 캐시/304 회피 (GET)
-baseInstance.defaults.headers.get = baseInstance.defaults.headers.get || {};
-baseInstance.defaults.headers.get["Cache-Control"] = "no-cache";
-baseInstance.defaults.headers.get["Pragma"] = "no-cache";
+/* ===== (추가) 동일 GET 중복 요청 디듀프 ===== */
+const inflight = new Map<string, Promise<unknown>>();
+function keyOf(c: AxiosRequestConfig) {
+  const m = String(c.method || "").toUpperCase();
+  const u = c.url || "";
+  const p = c.params ? JSON.stringify(c.params) : "";
+  const d = c.data ? JSON.stringify(c.data) : "";
+  return `${m}|${u}|${p}|${d}`;
+}
 
-/* ==================== 타입 ==================== */
+/* ==================== 인터셉터 유틸 ==================== */
+const isAuthPath = (url?: string) =>
+  !!url &&
+  (url.includes("/api/auth/login") || url.includes("/api/auth/refresh"));
+
+let refreshInFlight: Promise<void> | null = null;
+
+/* ==================== Request 인터셉터 ==================== */
+baseInstance.interceptors.request.use((config) => {
+  // 헤더를 항상 AxiosHeaders로
+  config.headers = ensureAxiosHeaders(config.headers);
+  const h = config.headers as AxiosHeaders;
+
+  // GET 캐시 무효화
+  if (config.method?.toLowerCase() === "get") {
+    h.set("Cache-Control", "no-cache");
+    h.set("Pragma", "no-cache");
+  }
+
+  // Authorization 자동 부착 (퍼블릭 요청은 제외)
+  const skipAuth = (config as InternalAxiosRequestConfig).__skipAuth === true;
+  if (!skipAuth && !isAuthPath(config.url) && !h.has("Authorization")) {
+    const token = useAuthStore.getState().accessToken;
+    if (token) h.set("Authorization", `Bearer ${token}`);
+  }
+
+  return config;
+});
+
+/* ==================== Response 인터셉터 ==================== */
+// 401 → refreshTokens 실행 → 원 요청 1회 재시도
+baseInstance.interceptors.response.use(
+  (res) => res,
+  async (error: AxiosError) => {
+    const { response, config } = error || {};
+    if (!response || !config) throw error;
+    if (response.status !== 401 || isAuthPath(config.url)) throw error;
+
+    const orig = config as InternalAxiosRequestConfig & { _retry?: boolean };
+    if (orig._retry) throw error; // 루프 방지
+
+    const store = useAuthStore.getState();
+
+    try {
+      if (!refreshInFlight) {
+        refreshInFlight = store.refreshTokens().finally(() => {
+          refreshInFlight = null;
+        });
+      }
+      await refreshInFlight;
+
+      // 최신 액세스 토큰으로 재시도
+      orig._retry = true;
+      orig.headers = ensureAxiosHeaders(orig.headers);
+      (orig.headers as AxiosHeaders).set(
+        "Authorization",
+        `Bearer ${useAuthStore.getState().accessToken ?? ""}`
+      );
+
+      return baseInstance(orig);
+    } catch (e) {
+      // 리프레시 실패 → 완전 로그아웃
+      store.clearAuth?.();
+      throw e;
+    }
+  }
+);
+
+/* ==================== 공개 옵션 타입 ==================== */
 type ApiOptions = {
   data?: unknown;
   params?: Record<string, string | number | boolean | null | undefined>;
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  /** 기본값 true: 보호 API. false면 퍼블릭(토큰 자동부착/검사 안함) */
   auth?: boolean;
 };
 
-/* ==================== API 함수 ==================== */
+/* ==================== 공용 호출 함수 ==================== */
 export const apiRequest = async <T = unknown>(
   method: Method,
   url: string,
   options?: ApiOptions
 ): Promise<T> => {
-  // params에서 null/undefined/빈문자 제거 (json-server 필터 오염 방지)
+  // params에서 null/undefined/빈문자 제거
   const cleanedParams =
     options?.params &&
     Object.fromEntries(
@@ -37,35 +134,52 @@ export const apiRequest = async <T = unknown>(
       )
     );
 
-  const mergedHeaders: Record<string, string> = { ...(options?.headers || {}) };
+  // 호출자가 명시한 헤더(문자열 레코드)만 우선 병합
+  const mergedHeaders: Record<string, string> = {
+    ...(options?.headers || {}),
+  };
 
+  // 보호 API면 authHeader()도 병합(Authorization 등)
   if (options?.auth !== false) {
-    // 보호 API: 토큰이 없으면 예외를 그대로 던져서 조기에 차단
     Object.assign(mergedHeaders, authHeader());
   }
 
+  // JSON body면 Content-Type 기본값 (FormData는 자동)
   const hasContentType = Object.keys(mergedHeaders).some(
     (k) => k.toLowerCase() === "content-type"
   );
-
-  // FormData면 Content-Type을 절대 수동 지정하지 않음 (브라우저/axios가 boundary 포함해서 자동 설정)
   const isFormData =
     typeof FormData !== "undefined" && options?.data instanceof FormData;
-
-  // JSON body일 때만 기본 Content-Type 지정
   if (options?.data !== undefined && !hasContentType && !isFormData) {
     mergedHeaders["Content-Type"] = "application/json";
   }
 
-  const config: AxiosRequestConfig = {
+  // 퍼블릭 호출이면 인터셉터에서 토큰 자동부착을 건너뛰게 플래그 설정
+  const config: InternalAxiosRequestConfig = {
     method,
     url,
     data: options?.data,
     params: cleanedParams,
-    headers: mergedHeaders,
+    headers: mergedHeaders, // POJO → 인터셉터에서 AxiosHeaders로 통일
     signal: options?.signal,
+    __skipAuth: options?.auth === false,
   };
 
-  const response = await baseInstance(config);
-  return response.data as T;
+  /* ===== (추가) 동일 GET 중복 요청 디듀프 ===== */
+  const isGet = String(method).toUpperCase() === "GET";
+  const k = isGet ? keyOf(config) : "";
+
+  if (isGet && inflight.has(k)) {
+    return inflight.get(k) as Promise<T>;
+  }
+
+  const req = baseInstance(config)
+    .then((r) => r.data as T)
+    .finally(() => {
+      if (isGet) inflight.delete(k);
+    });
+
+  if (isGet) inflight.set(k, req);
+
+  return req;
 };

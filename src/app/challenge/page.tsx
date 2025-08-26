@@ -69,7 +69,7 @@ export default function ChallengePage() {
                 !err &&
                 ranking.map((item, idx) => (
                   <div
-                    key={item.tipId}
+                    key={`rank-${item.tipId}-${idx}`} // ✅ tipId 중복/undefined 대비
                     onClick={() => router.push(`?modal=${item.tipId}`)}
                     className="shrink-0 border border-[#d9d9d9] rounded-xl flex relative w-[350px] h-[150px] p-4 pt-[24px] pl-[10px]"
                   >
@@ -93,9 +93,9 @@ export default function ChallengePage() {
                       </div>
                       <div className="max-w-[200px] overflow-hidden whitespace-nowrap text-ellipsis text-xs mb-4">
                         <div className="inline-flex gap-1">
-                          {item.tags.slice(0, 4).map((tag) => (
+                          {item.tags.slice(0, 4).map((tag, tIdx) => (
                             <span
-                              key={tag}
+                              key={`tag-${item.tipId}-${tIdx}`}
                               className="bg-[#d9d9d9]/50 border border-black/10 px-2 py-0.5 rounded-sm"
                             >
                               {tag}

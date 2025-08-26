@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 // API 호출에 쓸 타입/함수 임포트
 import { getUserProfile, type UserProfile as ApiUserProfile } from "@/lib/user";
+import { apiRequest } from "@/lib/apiClient";
 
 type UserProfile = {
   login: string;
@@ -31,6 +32,8 @@ type AuthState = {
   //  로그인 직후 userNo로 프로필 불러와 저장
   loadUserProfile: (userNo: number) => Promise<void>;
 
+  refreshTokens: () => Promise<void>;
+
   // 신규: 카운트 관련 액션
   updateCounts: (
     p: Partial<
@@ -48,7 +51,7 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       accessToken: null,
       refreshToken: null,
 
@@ -83,6 +86,25 @@ export const useAuthStore = create<AuthState>()(
           followerCount: null,
           followingCount: null,
           totalBookmarkCount: null,
+        });
+      },
+
+      /* 리프레시 토큰으로 액세스 토큰 재발급 */
+      refreshTokens: async () => {
+        const rt = get().refreshToken;
+        if (!rt) throw new Error("리프레시 토큰이 없습니다.");
+        const res = await apiRequest<{
+          accessToken: string;
+          refreshToken?: string;
+        }>("POST", "/api/auth/refresh", {
+          auth: false, // access 자동부착 금지
+          headers: { Authorization: `Bearer ${rt}` },
+        });
+
+        // 새 토큰들 반영 (서버가 새 refreshToken을 돌려주니 꼭 교체)
+        set({
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken ?? rt,
         });
       },
 

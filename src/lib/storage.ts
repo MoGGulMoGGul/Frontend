@@ -73,8 +73,7 @@ export const getStoragesByGroup = async (
 ): Promise<GroupStorageItem[]> => {
   const res = await apiRequest<BackendGroupStorageListItem[]>(
     "GET",
-    `/api/query/storage/group/${groupNo}`,
-    { params: { cb: Date.now().toString() } }
+    `/api/query/storage/group/${groupNo}`
   );
   return res.map((item) => ({ storageNo: item.storageNo, name: item.name }));
 };
@@ -85,8 +84,7 @@ export const getUserStorageList = async (
 ): Promise<UserStorageItem[]> => {
   const res = await apiRequest<BackendUserStorageListItem[]>(
     "GET",
-    `/api/query/storage/${userNo}`,
-    { params: { cb: Date.now().toString() } }
+    `/api/query/storage/${userNo}`
   );
   return res.map((item) => ({ storageNo: item.storageNo, name: item.name }));
 };
@@ -108,8 +106,7 @@ export const getStorageTips = async (
 ): Promise<TipSearchItem[]> => {
   const rows = await apiRequest<StorageTipRow[]>(
     "GET",
-    `/api/query/storage/${storageNo}`,
-    { params: { cb: Date.now().toString() } }
+    `/api/query/storage/${storageNo}`
   );
   return rows.map((r) => ({
     id: r.no,

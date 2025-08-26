@@ -42,25 +42,28 @@ function Sidebar() {
     if (bootOnce.current) return;
     bootOnce.current = true;
 
+    // force 제거 → 스토어의 _inflight / _loadedOnce 가드가 동작
     useUserStorageStore
       .getState()
-      .load(userNo, true) // force=true 로 서버 상태와 동일화
+      .load(userNo)
       .catch(() => {});
   }, [userNo]);
 
-  // 라우팅이 /mytip 로 들어오면 강제로 동기화(사이드바는 유지 컴포넌트라서 클릭 이벤트에 의존하지 않도록)
+  // /mytip 경로에서만 동기화 시도
   useEffect(() => {
     if (userNo == null) return;
     if (pathname === "/mytip" || pathname.startsWith("/mytip/")) {
+      // force 제거 → 과도한 재호출 방지
       useUserStorageStore
         .getState()
-        .load(userNo, true)
+        .load(userNo)
         .catch(() => {});
     }
   }, [pathname, userNo]);
 
   useEffect(() => {
     if (pathname === "/grouptip" || pathname.startsWith("/grouptip/")) {
+      // 그룹쪽은 기존 로직 유지(필요시 동일하게 force 제거 고려)
       useGroupStore
         .getState()
         .load(true)
@@ -149,6 +152,7 @@ function Sidebar() {
       ? nickname.trim()
       : "사용자"
     : "내";
+
   return (
     <div className="h-full min-h-screen">
       {/* 공통 알림 모달 */}

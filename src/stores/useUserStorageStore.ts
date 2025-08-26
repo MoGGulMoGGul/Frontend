@@ -19,6 +19,10 @@ type State = {
   loading: boolean;
   error: string | null;
   ownerUserNo: number | null;
+
+  // 로딩 제어 플래그
+  _loadedOnce: boolean; // 이 유저 기준으로 최소 1회 로딩 완료 여부(성공/실패 무관)
+  _inflight: boolean; // 중복 네트워크 호출 방지
 };
 
 type Actions = {
@@ -37,21 +41,42 @@ export const useUserStorageStore = create<State & Actions>()(
       error: null,
       ownerUserNo: null,
 
-      load: async (userNo: number, force = false) => {
-        const { loading, ownerUserNo, storages } = get();
-        if (!force && ownerUserNo === userNo && storages.length > 0) return;
-        if (loading) return;
+      // 초기값
+      _loadedOnce: false,
+      _inflight: false,
 
-        set({ loading: true, error: null, ownerUserNo: userNo });
+      load: async (userNo: number, force = false) => {
+        const s = get();
+
+        // 1) 이미 어떤 유저의 목록을 가지고 있고, 그 유저와 다르면 (force가 아닌 이상) 무시
+        if (!force && s.ownerUserNo !== null && s.ownerUserNo !== userNo) {
+          return;
+        }
+
+        // 2) 같은 유저로 이미 한 번 로딩 끝났으면 (force 아니면) 스킵
+        if (!force && s.ownerUserNo === userNo && s._loadedOnce) return;
+
+        // 3) 중복 네트워크 방지
+        if (s._inflight) return;
+
+        // 여기서 ownerUserNo를 바꾸지 말고, 성공 후에만 바꿈
+        set({ loading: true, error: null, _inflight: true });
+
         try {
           const list = await getUserStorageList(userNo);
-          set({ storages: list, error: null });
+          set({
+            storages: list,
+            error: null,
+            _loadedOnce: true,
+            ownerUserNo: userNo, // 성공 시에만 소유자 확정
+          });
         } catch (e: unknown) {
           set({
             error: errorToMessage(e, "내 보관함 목록을 불러오지 못했습니다."),
+            _loadedOnce: true, // 실패해도 1회 처리로 간주 (루프 방지)
           });
         } finally {
-          set({ loading: false });
+          set({ loading: false, _inflight: false });
         }
       },
 

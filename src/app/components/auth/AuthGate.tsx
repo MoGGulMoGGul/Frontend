@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -10,7 +10,9 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   const accessToken = useAuthStore((s) => s.accessToken);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
 
   const isPublic = useMemo(() => {
@@ -19,27 +21,57 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const [ready, setReady] = useState(isPublic);
+  const triedRefresh = useRef(false); // 새로고침 직후 1회만 리프레시 시도
 
   useEffect(() => {
+    // 로컬스토리지 복원되기 전엔 아무 것도 하지 않음
     if (!hasHydrated) return;
 
-    // 비로그인 & 비공개 경로 → 로그인으로
-    if (!accessToken && !isPublic) {
-      const next = `${pathname}${
-        searchParams?.toString() ? `?${searchParams}` : ""
-      }`;
-      router.replace(`/login?next=${encodeURIComponent(next)}`);
+    // 공개 경로는 바로 렌더
+    if (isPublic) {
       setReady(true);
       return;
     }
-    // 로그인했는데 로그인 페이지에 있으면 → next 또는 홈
-    if (accessToken && pathname === "/login") {
-      const next = searchParams?.get("next");
-      router.replace(next || "/");
+
+    // 이미 accessToken 있으면 패스
+    if (accessToken) {
+      setReady(true);
       return;
     }
-    setReady(true);
-  }, [accessToken, isPublic, pathname, searchParams, router, hasHydrated]);
+
+    // 여기서부터: 비공개 경로 + accessToken 없음
+    // refreshToken 이 있고 아직 시도 안했으면 자동 갱신 1회 시도
+    const doWork = async () => {
+      if (refreshToken && !triedRefresh.current) {
+        triedRefresh.current = true;
+        try {
+          await useAuthStore.getState().refreshTokens(); // ⚡ 토큰 재발급 시도
+        } catch {
+          // 실패해도 흐름 계속
+        }
+      }
+
+      // 갱신 결과 재확인
+      const tokenNow = useAuthStore.getState().accessToken;
+      if (!tokenNow) {
+        const next = `${pathname}${
+          searchParams?.toString() ? `?${searchParams}` : ""
+        }`;
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
+      }
+      setReady(true);
+    };
+
+    void doWork();
+  }, [
+    accessToken,
+    isPublic,
+    pathname,
+    searchParams,
+    router,
+    hasHydrated,
+    refreshToken,
+  ]);
 
   if (!ready && !isPublic) {
     return (

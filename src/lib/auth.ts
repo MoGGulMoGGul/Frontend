@@ -15,6 +15,12 @@ type LoginResponse = {
 
 type EmptyResponse = void;
 
+type RefreshResponse = {
+  accessToken: string;
+  refreshToken?: string; // 서버가 새 리프레시 토큰까지 줄 수도 있으면 optional
+  userNo?: number; // 서버가 유저번호를 껴줄 수도 있으면 optional
+};
+
 /* ==================== API: Auth ==================== */
 /** Login (mock: /signup GET 검증, real: POST /api/auth/login) */
 export const login = async (
@@ -99,6 +105,25 @@ export const withdrawal = async (
   return apiRequest("DELETE", "/api/auth/withdrawal", {
     headers: {
       Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
+
+/* ----- 리프레쉬 토큰 재발급 ----- */
+export const refreshAccessToken = async (
+  refreshToken?: string
+): Promise<RefreshResponse> => {
+  const token =
+    refreshToken ?? useAuthStore.getState().refreshToken ?? undefined;
+  if (!token) {
+    throw new Error("리프레시 토큰이 없습니다.");
+  }
+
+  // access 토큰 없이 호출해야 하므로 auth:false
+  return apiRequest<RefreshResponse>("POST", "/api/auth/refresh", {
+    auth: false,
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
   });
 };
