@@ -356,8 +356,11 @@ export default function MyPage() {
             />
           )}
 
-          {showFollowerList && (
-            <FollowerListModal onClose={() => setShowFollowerList(false)} />
+          {showFollowerList && typeof userNo === "number" && (
+            <FollowerListModal
+              targetUserNo={userNo}
+              onClose={() => setShowFollowerList(false)}
+            />
           )}
 
           {/* 회원탈퇴 확인 모달 */}

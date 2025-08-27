@@ -9,26 +9,36 @@ import {
   followUser,
   unfollowUser,
   type FollowUserItem,
+  getUserProfile,
 } from "@/lib/user";
 import { extractApiErrorMessage } from "@/lib/error";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function FollowingListModal({
+  targetUserNo,
   onClose,
 }: {
+  targetUserNo: number;
   onClose: () => void;
 }) {
   const [followings, setFollowings] = useState<FollowUserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const [processing, setProcessing] = useState<Set<number>>(new Set());
-  const userNo = useAuthStore((s) => s.userNo);
+
+  // 진행 상태는 loginId 기준으로 관리
+  const [processing, setProcessing] = useState<Set<string>>(new Set());
+
+  // 로그인한 내 번호 (카운트 동기화용)
+  const myUserNo = useAuthStore((s) => s.userNo);
+  const incFollowing = useAuthStore((s) => s.incFollowing);
+  const setCountsFromProfile = useAuthStore((s) => s.setCountsFromProfile);
 
   useEffect(() => {
     let alive = true;
 
     // 로그인 여부/값 가드
-    if (typeof userNo !== "number") {
+    if (typeof myUserNo !== "number") {
       setFollowings([]);
       setErrMsg("로그인이 필요합니다.");
       setLoading(false);
@@ -38,7 +48,8 @@ export default function FollowingListModal({
     (async () => {
       try {
         setLoading(true);
-        const data = await getFollowings(userNo);
+        // ✅ 전달받은 targetUserNo의 팔로잉 목록 조회
+        const data = await getFollowings(targetUserNo);
         if (!alive) return;
         setFollowings(data);
         setErrMsg(null);
@@ -52,50 +63,68 @@ export default function FollowingListModal({
     return () => {
       alive = false;
     };
-  }, [userNo]);
+  }, [targetUserNo, myUserNo]);
 
-  const setBusy = (userNo: number, on: boolean) =>
+  const setBusy = (loginId: string, on: boolean) =>
     setProcessing((prev) => {
       const next = new Set(prev);
-      if (on) {
-        next.add(userNo);
-      } else {
-        next.delete(userNo);
-      }
+      if (on) next.add(loginId);
+      else next.delete(loginId);
       return next;
     });
 
+  // loginId로 API 호출, userNo는 UI 토글 기준
   const handleToggleFollow = async (
-    userNo: number,
+    targetLoginId: string,
+    targetUserNoForUi: number,
     currentIsFollow: boolean
   ) => {
-    if (processing.has(userNo)) return; // 중복 클릭 방지
     setErrMsg(null);
-    setBusy(userNo, true);
+    if (processing.has(targetLoginId)) return;
+    if (typeof myUserNo !== "number") {
+      setErrMsg("로그인이 필요합니다.");
+      return;
+    }
 
-    // 낙관적 업데이트
+    setBusy(targetLoginId, true);
+
+    // 1) UI 즉시 토글
     setFollowings((prev) =>
       prev.map((u) =>
-        u.userNo === userNo ? { ...u, isFollow: !currentIsFollow } : u
+        u.userNo === targetUserNoForUi
+          ? { ...u, isFollow: !currentIsFollow }
+          : u
       )
     );
 
+    // 2) 내 followingCount 낙관적 반영
+    const delta = currentIsFollow ? -1 : 1;
+    incFollowing(delta);
+
     try {
+      // 3) API (백엔드가 loginId를 기대)
       if (currentIsFollow) {
-        await unfollowUser(String(userNo));
+        await unfollowUser(targetLoginId);
       } else {
-        await followUser(String(userNo));
+        await followUser(targetLoginId);
       }
+
+      // 4) 내 카운트 최신 동기화
+      const freshMe = await getUserProfile(myUserNo);
+      setCountsFromProfile(freshMe);
     } catch (err) {
-      // 실패 시 롤백
+      // 5) 실패 시 UI/카운트 롤백
       setFollowings((prev) =>
         prev.map((u) =>
-          u.userNo === userNo ? { ...u, isFollow: currentIsFollow } : u
+          u.userNo === targetUserNoForUi
+            ? { ...u, isFollow: currentIsFollow }
+            : u
         )
       );
+      incFollowing(-delta);
       setErrMsg(extractApiErrorMessage(err));
     } finally {
-      setBusy(userNo, false);
+      setBusy(targetLoginId, false);
     }
   };
 
@@ -121,7 +150,11 @@ export default function FollowingListModal({
         {!loading && !errMsg && followings.length > 0 && (
           <ul>
             {followings.map((f) => {
-              const isBusy = processing.has(f.userNo);
+              // busy 키: loginId가 있으면 loginId, 없으면 userNo 문자열
+              const busyKey = f.loginId ?? String(f.userNo);
+              const isBusy = processing.has(busyKey);
+              const canFollow = !!f.loginId; // loginId 없으면 버튼 비활성화
+
               return (
                 <li
                   key={f.userNo}
@@ -130,8 +163,12 @@ export default function FollowingListModal({
                   <div className="flex items-center gap-3">
                     <div className="relative w-[40px] h-[40px] rounded-full overflow-hidden bg-[#d9d9d9]">
                       <Image
-                        src={f.profileImageUrl || "/img/1bee.png"}
+                        src={resolveLocalThumb(
+                          f.profileImageUrl,
+                          "/img/1bee.png"
+                        )}
                         alt={`${f.nickname} 프로필 이미지`}
+                        sizes="40px"
                         fill
                         className="object-cover"
                       />
@@ -140,8 +177,18 @@ export default function FollowingListModal({
                   </div>
 
                   <button
-                    onClick={() => handleToggleFollow(f.userNo, f.isFollow)}
-                    disabled={isBusy}
+                    onClick={() =>
+                      canFollow &&
+                      handleToggleFollow(f.loginId!, f.userNo, f.isFollow)
+                    }
+                    disabled={isBusy || !canFollow}
+                    title={
+                      canFollow
+                        ? f.isFollow
+                          ? "언팔로우"
+                          : "팔로우"
+                        : "아이디 정보가 없어 팔로우할 수 없어요"
+                    }
                     className={[
                       "w-[94px] h-[49px] rounded-xl border hover:cursor-pointer disabled:opacity-60",
                       f.isFollow
@@ -150,7 +197,6 @@ export default function FollowingListModal({
                     ].join(" ")}
                     aria-pressed={f.isFollow}
                     aria-label={f.isFollow ? "언팔로우" : "팔로우"}
-                    title={f.isFollow ? "언팔로우" : "팔로우"}
                   >
                     {isBusy ? "처리 중..." : f.isFollow ? "팔로잉" : "팔로우"}
                   </button>

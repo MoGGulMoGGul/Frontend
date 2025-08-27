@@ -125,7 +125,7 @@ export type SaveTipToMyStorageError = {
 
 // 주간 즐겨찾기 랭킹
 export type WeeklyBookmarkRankingItem = {
-  tipId: number;
+  tipNo: number;
   title: string;
   thumbnailUrl: string | null;
   nickname: string;
@@ -157,7 +157,6 @@ export async function createTipDraft(
   data: CreateTipDraftRequest
 ): Promise<TipDraftResponse> {
   return apiRequest<TipDraftResponse>("POST", "/api/tips/generate", {
-    headers: authHeader(),
     data,
   });
 }
@@ -167,7 +166,6 @@ export async function registerTip(
   data: RegisterTipRequest
 ): Promise<TipRegisteredResponse> {
   return apiRequest<TipRegisteredResponse>("POST", "/api/tips/register", {
-    headers: authHeader(),
     data,
   });
 }
@@ -177,7 +175,6 @@ export async function saveTipToMyStorage(
   data: SaveTipRequest
 ): Promise<SaveTipResponse> {
   return apiRequest<SaveTipResponse>("POST", "/api/tips/register", {
-    headers: authHeader(),
     data,
   });
 }
@@ -185,9 +182,7 @@ export async function saveTipToMyStorage(
 /* ----- Read ----- */
 // 내 꿀팁 목록 조회
 export async function getMyTips(): Promise<MyTipItem[]> {
-  return apiRequest<MyTipItem[]>("GET", "/api/query/tips/my", {
-    headers: authHeader(),
-  });
+  return apiRequest<MyTipItem[]>("GET", "/api/query/tips/my");
 }
 
 // 전체 꿀팁 목록
@@ -199,12 +194,12 @@ export async function getPublicTips(): Promise<PublicTipItem[]> {
 
 // 꿀팁 상세
 export async function getTipDetail(tipNo: number): Promise<TipDetail> {
-  return apiRequest<TipDetail>("GET", `/api/query/tips/${tipNo}`, {});
+  return apiRequest<TipDetail>("GET", `/api/query/tips/${tipNo}`);
 }
 
 // 특정 유저 꿀팁 목록
 export async function getUserTips(userNo: number): Promise<MyTipItem[]> {
-  return apiRequest<MyTipItem[]>("GET", `/api/query/tips/user/${userNo}`, {});
+  return apiRequest<MyTipItem[]>("GET", `/api/query/tips/user/${userNo}`);
 }
 
 // 주간 즐겨찾기 랭킹
@@ -213,8 +208,7 @@ export async function getWeeklyBookmarkRanking(): Promise<
 > {
   return apiRequest<WeeklyBookmarkRankingItem[]>(
     "GET",
-    "/api/bookmark/ranking/weekly",
-    {}
+    "/api/bookmark/ranking/weekly"
   );
 }
 
@@ -244,7 +238,6 @@ export async function saveBookMarkTip(
   data: SaveTipRequest
 ): Promise<SaveTipResponse> {
   return apiRequest<SaveTipResponse>("POST", "/api/bookmark", {
-    headers: authHeader(),
     data,
   });
 }

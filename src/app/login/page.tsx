@@ -107,6 +107,7 @@ export default function Login() {
     <div className="flex items-center justify-center flex-col h-screen">
       <div className="w-[500px] border border-[#d9d9d9] rounded-xl p-6">
         <form
+          autoComplete="off"
           onSubmit={(e) => {
             e.preventDefault();
             handleLogin();

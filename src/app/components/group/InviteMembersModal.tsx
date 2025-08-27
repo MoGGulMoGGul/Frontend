@@ -7,6 +7,8 @@ import ModalCancelBtn from "@/app/components/modal/ModalCancelBtn";
 import { searchUsersById, type UserSearchItem } from "@/lib/search";
 import { getUserProfile } from "@/lib/user";
 import { inviteGroupMember } from "@/lib/groups";
+import Image from "next/image";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 type Props = {
   groupNo: number;
@@ -126,7 +128,7 @@ export default function InviteMembersModal({
               {loadingSearch ? "검색 중..." : "검색 결과가 없습니다."}
             </div>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y divide-gray-300">
               {results.map((u) => {
                 const active = !!selected[u.userNo];
                 return (
@@ -140,20 +142,21 @@ export default function InviteMembersModal({
                     <div className="flex items-center gap-3">
                       {/* 썸네일 */}
                       {u.profileImageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={u.profileImageUrl}
+                        <Image
+                          src={resolveLocalThumb(
+                            u.profileImageUrl,
+                            "/img/1bee.png"
+                          )}
                           alt={u.nickname}
-                          className="w-8 h-8 rounded-full object-cover"
+                          width={32} // 또는 원하는 크기
+                          height={32}
+                          className="rounded-full object-cover"
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200" />
                       )}
                       <div>
                         <div className="font-medium">{u.nickname}</div>
-                        <div className="text-xs text-gray-500">
-                          userNo: {u.userNo}
-                        </div>
                       </div>
                     </div>
                     <input type="checkbox" readOnly checked={active} />

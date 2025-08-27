@@ -13,24 +13,30 @@ import {
 } from "@/lib/user";
 import { extractApiErrorMessage } from "@/lib/error";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function FollowerListModal({
+  targetUserNo,
   onClose,
 }: {
+  targetUserNo: number;
   onClose: () => void;
 }) {
   const [followers, setFollowers] = useState<FollowUserItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const [processing, setProcessing] = useState<Set<number>>(new Set());
-  const userNo = useAuthStore((s) => s.userNo);
+
+  // 진행 상태를 loginId 기준으로 관리
+  const [processing, setProcessing] = useState<Set<string>>(new Set());
+
+  const userNo = useAuthStore((s) => s.userNo); // 로그인한 내 번호
   const incFollowing = useAuthStore((s) => s.incFollowing);
   const setCountsFromProfile = useAuthStore((s) => s.setCountsFromProfile);
 
   useEffect(() => {
     let alive = true;
 
-    // 로그인 여부/값 가드
+    // (기존 로직 유지) 로그인 요구
     if (typeof userNo !== "number") {
       setFollowers([]);
       setErrMsg("로그인이 필요합니다.");
@@ -41,7 +47,7 @@ export default function FollowerListModal({
     (async () => {
       try {
         setLoading(true);
-        const data = await getFollowers(userNo);
+        const data = await getFollowers(targetUserNo); // ✅ targetUserNo 사용
         if (!alive) return;
         setFollowers(data);
         setErrMsg(null);
@@ -55,36 +61,38 @@ export default function FollowerListModal({
     return () => {
       alive = false;
     };
-  }, [userNo]);
+  }, [targetUserNo, userNo]);
 
-  const setBusy = (userNo: number, on: boolean) =>
+  // 상태 갱신 반영되도록 next 반환
+  const setBusy = (loginId: string, on: boolean) =>
     setProcessing((prev) => {
       const next = new Set(prev);
-      if (on) {
-        next.add(userNo);
-      } else {
-        next.delete(userNo);
-      }
+      if (on) next.add(loginId);
+      else next.delete(loginId);
       return next;
     });
 
+  // loginId로 API 호출, userNo는 UI 토글 기준
   const handleToggleFollow = async (
-    targetUserNo: number,
+    targetLoginId: string,
+    targetUserNoForUi: number,
     currentIsFollow: boolean
   ) => {
     setErrMsg(null);
-    if (processing.has(targetUserNo)) return;
+    if (processing.has(targetLoginId)) return;
     if (typeof userNo !== "number") {
       setErrMsg("로그인이 필요합니다.");
       return;
     }
 
-    setBusy(targetUserNo, true);
+    setBusy(targetLoginId, true);
 
     // 1) UI 즉시 토글
     setFollowers((prev) =>
       prev.map((u) =>
-        u.userNo === targetUserNo ? { ...u, isFollow: !currentIsFollow } : u
+        u.userNo === targetUserNoForUi
+          ? { ...u, isFollow: !currentIsFollow }
+          : u
       )
     );
 
@@ -93,11 +101,11 @@ export default function FollowerListModal({
     incFollowing(delta);
 
     try {
-      // 3) API
+      // 3) API (백엔드가 loginId를 기대)
       if (currentIsFollow) {
-        await unfollowUser(String(targetUserNo));
+        await unfollowUser(targetLoginId);
       } else {
-        await followUser(String(targetUserNo));
+        await followUser(targetLoginId);
       }
 
       // 4) 서버 최신값 동기화
@@ -107,13 +115,15 @@ export default function FollowerListModal({
       // 5) 실패 시 UI/카운트 롤백
       setFollowers((prev) =>
         prev.map((u) =>
-          u.userNo === targetUserNo ? { ...u, isFollow: currentIsFollow } : u
+          u.userNo === targetUserNoForUi
+            ? { ...u, isFollow: currentIsFollow }
+            : u
         )
       );
       incFollowing(-delta);
       setErrMsg(extractApiErrorMessage(err));
     } finally {
-      setBusy(targetUserNo, false);
+      setBusy(targetLoginId, false);
     }
   };
 
@@ -139,7 +149,9 @@ export default function FollowerListModal({
         {!loading && !errMsg && followers.length > 0 && (
           <ul>
             {followers.map((f) => {
-              const isBusy = processing.has(f.userNo);
+              // loginId가 없다면 userNo 문자열을 대체키로 사용
+              const busyKey = f.loginId ?? String(f.userNo);
+              const isBusy = processing.has(busyKey);
               return (
                 <li
                   key={f.userNo}
@@ -148,8 +160,12 @@ export default function FollowerListModal({
                   <div className="flex items-center gap-3">
                     <div className="relative w-[40px] h-[40px] rounded-full overflow-hidden bg-[#d9d9d9]">
                       <Image
-                        src={f.profileImageUrl || "/img/1bee.png"}
+                        src={resolveLocalThumb(
+                          f.profileImageUrl,
+                          "/img/1bee.png"
+                        )}
                         alt={`${f.nickname} 프로필 이미지`}
+                        sizes="40px"
                         fill
                         className="object-cover"
                       />
@@ -158,7 +174,13 @@ export default function FollowerListModal({
                   </div>
 
                   <button
-                    onClick={() => handleToggleFollow(f.userNo, f.isFollow)}
+                    onClick={() =>
+                      handleToggleFollow(
+                        f.loginId ?? String(f.userNo), // ✅ any 제거
+                        f.userNo,
+                        f.isFollow
+                      )
+                    }
                     disabled={isBusy}
                     className={[
                       "w-[94px] h-[49px] rounded-xl border hover:cursor-pointer disabled:opacity-60",

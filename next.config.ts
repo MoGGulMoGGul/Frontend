@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    // 개발/배포 둘 다 등록
     remotePatterns: [
       {
         protocol: "http",
@@ -21,7 +20,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.yourdomain.com",
+        hostname: "dummyimage.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "moggulmoggul.s3.ap-northeast-2.amazonaws.com",
         pathname: "/**",
       },
     ],

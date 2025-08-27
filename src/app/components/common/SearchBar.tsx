@@ -31,11 +31,7 @@ export default function SearchBar({
         className="w-full border border-[#D9D9D9] h-16 rounded-4xl px-6 outline-none ring-0 focus:border-[#D9D9D9]"
         placeholder={placeholder}
         value={query}
-        onChange={(e) => {
-          const value = e.target.value;
-          setQuery(value);
-          onSearch?.(value.trim());
-        }}
+        onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             runSearch();

@@ -9,7 +9,7 @@ import HexGridWithData from "../components/grid/HexGridWithData";
 import FloatingBtn from "../components/FloatingBtn";
 import SearchBar from "../components/common/SearchBar";
 
-import { getMyTips, type MyTipItem } from "@/lib/tips";
+import { getMyTips, getUserTips, type MyTipItem } from "@/lib/tips";
 import { MYTIP_IMAGE_SLOTS } from "@/app/components/grid/TipImageSlots";
 
 import FollowerListModal from "../components/common/FollowerListModal";
@@ -24,6 +24,8 @@ export default function MytipPage() {
   const searchParams = useSearchParams();
   const modalId = searchParams.get("modal");
 
+  const userNo = useAuthStore((s) => s.userNo);
+
   // 팔로워/팔로잉 모달 상태
   const [openFollowers, setOpenFollowers] = useState(false);
   const [openFollowings, setOpenFollowings] = useState(false);
@@ -33,8 +35,12 @@ export default function MytipPage() {
   const login = useAuthStore((s) => s.login);
   const followerCount = useAuthStore((s) => s.followerCount);
   const followingCount = useAuthStore((s) => s.followingCount);
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
 
   const nfmt = new Intl.NumberFormat();
+
+  const tipsFetcher =
+    typeof userNo === "number" ? () => getUserTips(userNo) : getMyTips;
 
   return (
     <>
@@ -131,15 +137,19 @@ export default function MytipPage() {
 
         {/* 꿀팁 영역: 항상 내 꿀팁 목록 표시 (검색은 /search에서) */}
         <div className="relative">
-          <HexGridWithData<MyTipItem>
-            fetcher={getMyTips}
-            mapItem={(t) => ({ id: t.no, label: t.title || "(제목 없음)" })}
-            imageSlotConfig={MYTIP_IMAGE_SLOTS}
-            totalSlots={30}
-            cols={5}
-            emptyBg="#D9D9D9"
-            onCardClick={(id) => router.push(`?modal=${id}`)}
-          />
+          {hasHydrated && typeof userNo === "number" && (
+            <HexGridWithData<MyTipItem>
+              key={`user-${userNo}`}
+              fetcher={tipsFetcher}
+              mapItem={(t) => ({ id: t.no, label: t.title || "(제목 없음)" })}
+              imageSlotConfig={MYTIP_IMAGE_SLOTS}
+              totalSlots={30}
+              cols={5}
+              emptyBg="#D9D9D9"
+              onCardClick={(id) => router.push(`?modal=${id}`)}
+            />
+          )}
+
           <FloatingBtn />
         </div>
 
@@ -156,15 +166,21 @@ export default function MytipPage() {
         )}
 
         {/*  팔로워 / 팔로잉 모달 */}
-        {openFollowers && (
+        {openFollowers && typeof userNo === "number" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <FollowerListModal onClose={() => setOpenFollowers(false)} />
+            <FollowerListModal
+              targetUserNo={userNo}
+              onClose={() => setOpenFollowers(false)}
+            />
           </div>
         )}
 
-        {openFollowings && (
+        {openFollowings && typeof userNo === "number" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <FollowingListModal onClose={() => setOpenFollowings(false)} />
+            <FollowingListModal
+              targetUserNo={userNo}
+              onClose={() => setOpenFollowings(false)}
+            />
           </div>
         )}
       </div>

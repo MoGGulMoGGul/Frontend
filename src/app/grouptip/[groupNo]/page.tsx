@@ -343,10 +343,11 @@ export default function GrouptipGroupPage() {
         {/* 멤버 조회/초대/나가기 모달 */}
         {showMembers && (
           <CommonModal>
-            <div className="min-w-[320px]">
+            <div className="min-w-[320px] max-w-[640px] mx-auto">
               <h3 className="text-lg font-semibold mb-3 text-center">
                 멤버 목록
               </h3>
+
               {membersLoading ? (
                 <div>불러오는 중...</div>
               ) : members.length === 0 ? (
@@ -354,14 +355,23 @@ export default function GrouptipGroupPage() {
                   멤버가 없습니다.
                 </div>
               ) : (
-                <ul className="max-h-[40vh] overflow-auto divide-y">
-                  {members.map((m) => (
-                    <li key={m.userNo} className="py-2">
-                      <div className="font-medium">{m.nickname}</div>
-                    </li>
-                  ))}
-                </ul>
+                <div className="max-h-[40vh] overflow-auto mb-3">
+                  <div className="flex flex-wrap gap-2">
+                    {members.map((m) => (
+                      <span
+                        key={m.userNo}
+                        className="inline-flex items-center px-3 h-8 rounded-full bg-gray-100 text-sm"
+                        title={m.nickname}
+                      >
+                        <span className="font-medium truncate max-w-[240px]">
+                          {m.nickname}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
+
               <div className="flex justify-center pt-4">
                 <OkBtn label="닫기" onClick={() => setShowMembers(false)} />
               </div>

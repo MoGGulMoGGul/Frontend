@@ -106,7 +106,7 @@ export const getStorageTips = async (
 ): Promise<TipSearchItem[]> => {
   const rows = await apiRequest<StorageTipRow[]>(
     "GET",
-    `/api/query/storage/${storageNo}`
+    `/api/query/tips/storage/${storageNo}`
   );
   return rows.map((r) => ({
     id: r.no,

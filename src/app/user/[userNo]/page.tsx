@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import SearchBar from "@/app/components/common/SearchBar";
 import ModalDetailContent from "@/app/components/modal/ModalDetailContent";
 import HexGridWithData from "@/app/components/grid/HexGridWithData";
@@ -20,17 +20,15 @@ import { useAuthStore } from "@/stores/useAuthStore";
 // 모달 컴포넌트 임포트
 import FollowerListModal from "@/app/components/common/FollowerListModal";
 import FollowingListModal from "@/app/components/common/FollowingListModal";
+import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
-export default function UserFeedPage({
-  params,
-}: {
-  params: { userNo: string };
-}) {
-  const id = Number(params.userNo);
-  const invalidParam = !Number.isFinite(id);
-
+export default function UserFeedPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { userNo } = useParams<{ userNo: string }>();
+  const id = Number(userNo);
+  const invalidParam = !Number.isFinite(id);
+
   const modalId = searchParams.get("modal");
 
   const myUserNo = useAuthStore((s) => s.userNo);
@@ -67,7 +65,7 @@ export default function UserFeedPage({
       } catch (e) {
         if (!alive) return;
         setErr("프로필 정보를 불러오지 못했습니다.");
-        console.log(e);
+        console.error(e);
       } finally {
         if (alive) setLoading(false);
       }
@@ -107,8 +105,11 @@ export default function UserFeedPage({
     incFollowing(delta);
 
     try {
-      if (currentIsFollow) await unfollowUser(String(id));
-      else await followUser(String(id));
+      if (currentIsFollow) {
+        await unfollowUser(profile.loginId);
+      } else {
+        await followUser(profile.loginId);
+      }
 
       // 내 카운트 최신 동기화
       const freshMe = await getUserProfile(myUserNo);
@@ -129,7 +130,7 @@ export default function UserFeedPage({
       );
       incFollowing(-delta);
       setActionErr("요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-      console.log(e);
+      console.error(e);
     } finally {
       setProcessing(false);
     }
@@ -154,9 +155,13 @@ export default function UserFeedPage({
               <div className="flex items-center">
                 <div className="relative w-24 h-24 rounded-full bg-gray-300 mr-2 overflow-hidden">
                   <Image
-                    src={profile.profileImageUrl || "/img/1bee.png"}
+                    src={resolveLocalThumb(
+                      profile?.profileImageUrl,
+                      "/img/1bee.png"
+                    )}
                     alt="프로필 이미지"
                     fill
+                    sizes="96px"
                     className="object-cover"
                   />
                 </div>
@@ -281,12 +286,18 @@ export default function UserFeedPage({
       {/* 팔로워 / 팔로잉 모달 렌더링 */}
       {openFollowers && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <FollowerListModal onClose={() => setOpenFollowers(false)} />
+          <FollowerListModal
+            targetUserNo={id}
+            onClose={() => setOpenFollowers(false)}
+          />
         </div>
       )}
       {openFollowings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <FollowingListModal onClose={() => setOpenFollowings(false)} />
+          <FollowingListModal
+            targetUserNo={id}
+            onClose={() => setOpenFollowings(false)}
+          />
         </div>
       )}
     </div>
