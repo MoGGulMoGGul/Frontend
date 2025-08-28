@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { createTipDraft, registerTip, TipDraftResponse } from "@/lib/tips";
+import { createTipDraft, registerTip, type TipDraftResponse } from "@/lib/tips";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useEnsureUserStoragesLoaded } from "@/hooks/useEnsureUserStoragesLoaded";
@@ -10,12 +10,13 @@ import BoldLabeledField from "../components/form/BoldLabeledInput";
 import CommonModal from "../components/modal/CommonModal";
 import OkBtn from "../components/common/OkBtn";
 import SearchBar from "../components/common/SearchBar";
-import router from "next/router";
+import { useRouter } from "next/navigation"; // ✅ App Router
 import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
-type Props = { onClose: () => void };
+export default function NewtipPage() {
+  const router = useRouter();
+  const onClose = () => router.back();
 
-export default function NewtipPage({ onClose }: Props) {
   const userNo =
     useAuthStore((s) => (s as unknown as { userNo?: number }).userNo) ?? 1;
 
@@ -33,7 +34,6 @@ export default function NewtipPage({ onClose }: Props) {
   const [saving, setSaving] = useState<boolean>(false);
 
   const [storageNo, setStorageNo] = useState<number | "">("");
-
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   const [infoModal, setInfoModal] = useState<null | {
@@ -48,9 +48,7 @@ export default function NewtipPage({ onClose }: Props) {
   const handleModalClose = () => {
     const callback = infoModal?.onConfirm;
     setInfoModal(null);
-    if (callback) {
-      callback();
-    }
+    if (callback) callback();
   };
 
   const onDrop: React.DragEventHandler<HTMLDivElement> = (e) => {
@@ -62,8 +60,10 @@ export default function NewtipPage({ onClose }: Props) {
     if (droppedText) {
       setUrl(droppedText.trim());
       setThumbnailUrl(null);
+      setDraftId(null); // URL 바뀌면 이전 초안 무효화(안전)
     }
   };
+
   const onDragOver: React.DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -81,6 +81,7 @@ export default function NewtipPage({ onClose }: Props) {
   const validUrl = useMemo(() => /^https?:\/\/\S+$/i.test(url), [url]);
   const canSummarize = validUrl && !summarizing;
   const canSave = draftId !== null && !saving && storageNo !== "";
+
   const handleSummarize = async () => {
     if (!validUrl) {
       openInfo("올바른 URL을 입력하거나 드래그해 주세요.");
@@ -115,6 +116,7 @@ export default function NewtipPage({ onClose }: Props) {
       setSummarizing(false);
     }
   };
+
   const handleSave = async () => {
     if (!canSave || typeof storageNo !== "number") return;
     try {
@@ -135,7 +137,7 @@ export default function NewtipPage({ onClose }: Props) {
 
   const thumbSrc = resolveLocalThumb(thumbnailUrl, "");
 
-  // 공통 입력 스타일(밝은 회색 배경 + 파란 포커스 제거)
+  // 공통 입력 스타일
   const fieldBase =
     "w-full max-w-[520px] h-11 px-3 rounded-md bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 " +
     "focus:outline-none focus:ring-0 focus:border-gray-300";
@@ -172,7 +174,7 @@ export default function NewtipPage({ onClose }: Props) {
       <div className="relative p-6 pt-0">
         <div className="flex flex-col">
           <div className="flex items-stretch gap-11 mb-20">
-            {/* 왼쪽: 드래그/URL 영역 (밝은 회색 + 점선 테두리로 영역 강조) */}
+            {/* 왼쪽: 드래그/URL 영역 */}
             <div
               onDrop={onDrop}
               onDragOver={onDragOver}
@@ -200,12 +202,12 @@ export default function NewtipPage({ onClose }: Props) {
                 </>
               )}
 
-              {/* URL 입력: 밝은 회색 배경 & 파란 포커스 제거 */}
               <input
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
                   if (thumbnailUrl) setThumbnailUrl(null);
+                  if (draftId !== null) setDraftId(null);
                 }}
                 placeholder="https://example.com/article..."
                 className={fieldBase}
@@ -265,7 +267,7 @@ export default function NewtipPage({ onClose }: Props) {
                 </div>
               </div>
 
-              {/* 저장 보관함 선택: URL 입력과 동일 톤 */}
+              {/* 저장 보관함 선택 */}
               <div className="mt-6">
                 <div className="font-semibold mb-2">저장할 보관함</div>
                 <select

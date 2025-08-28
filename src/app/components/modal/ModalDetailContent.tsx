@@ -233,7 +233,7 @@ export default function ModalDetailContent({ id, onClose }: Props) {
         </CommonModal>
       )}
       {saveOpen && (
-        <SaveTipModal tipId={id} onClose={() => setSaveOpen(false)} />
+        <SaveTipModal tipNo={id} onClose={() => setSaveOpen(false)} />
       )}
     </>
   );

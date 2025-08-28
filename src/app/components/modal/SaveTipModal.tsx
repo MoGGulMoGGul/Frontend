@@ -9,16 +9,16 @@ import { useUserStorageStore } from "@/stores/useUserStorageStore";
 import { saveBookMarkTip } from "@/lib/tips";
 
 type Props = {
-  tipId: number;
+  tipNo: number;
   onClose: () => void;
 };
 
-export default function SaveTipModal({ tipId, onClose }: Props) {
+export default function SaveTipModal({ tipNo, onClose }: Props) {
   const { groups } = useGroupStore();
   const { storages } = useUserStorageStore();
 
-  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  const [selectedStorageId, setSelectedStorageId] = useState<number | null>(
+  const [selectedGroupNo, setSelectedGroupNo] = useState<number | null>(null);
+  const [selectedStorageNo, setSelectedStorageNo] = useState<number | null>(
     null
   );
   const [saving, setSaving] = useState(false);
@@ -33,20 +33,20 @@ export default function SaveTipModal({ tipId, onClose }: Props) {
     try {
       setSaving(true);
 
-      if (!selectedStorageId && !selectedGroupId) {
+      if (!selectedStorageNo && !selectedGroupNo) {
         setResult({ type: "error", message: "저장할 위치를 선택하세요." });
         return;
       }
 
-      if (selectedStorageId) {
-        await saveBookMarkTip({ tipId, storageId: selectedStorageId });
+      if (selectedStorageNo) {
+        await saveBookMarkTip({ tipNo, storageNo: selectedStorageNo });
         setResult({ type: "success", message: "내 보관함에 저장했어요." });
         return;
       }
 
       // 그룹 저장 API 연결 시 아래 분기 사용
-      // if (selectedGroupId) {
-      //   await saveToGroupTip({ tipId, groupId: selectedGroupId });
+      // if (selectedGroupNo) {
+      //   await saveToGroupTip({ tipNo, groupNo: selectedGroupNo });
       //   setResult({ type: "success", message: "그룹 보관함에 저장했어요." });
       // }
     } catch (err) {
@@ -87,13 +87,13 @@ export default function SaveTipModal({ tipId, onClose }: Props) {
           <div className="relative">
             <select
               className={selectBase}
-              value={selectedStorageId ?? ""}
+              value={selectedStorageNo ?? ""}
               onChange={(e) => {
                 const val = e.target.value ? Number(e.target.value) : null;
-                setSelectedStorageId(val);
-                if (val !== null) setSelectedGroupId(null); // 서로 배타
+                setSelectedStorageNo(val);
+                if (val !== null) setSelectedGroupNo(null); // 서로 배타
               }}
-              disabled={selectedGroupId !== null}
+              disabled={selectedGroupNo !== null}
             >
               <option value="">선택 안 함</option>
               {storages.map((st) => (
@@ -102,7 +102,6 @@ export default function SaveTipModal({ tipId, onClose }: Props) {
                 </option>
               ))}
             </select>
-            {/* 커스텀 화살표 */}
             <span className={chevron}>
               <svg
                 width="18"
@@ -122,13 +121,13 @@ export default function SaveTipModal({ tipId, onClose }: Props) {
           <div className="relative">
             <select
               className={selectBase}
-              value={selectedGroupId ?? ""}
+              value={selectedGroupNo ?? ""}
               onChange={(e) => {
                 const val = e.target.value ? Number(e.target.value) : null;
-                setSelectedGroupId(val);
-                if (val !== null) setSelectedStorageId(null); // 서로 배타
+                setSelectedGroupNo(val);
+                if (val !== null) setSelectedStorageNo(null); // 서로 배타
               }}
-              disabled={selectedStorageId !== null}
+              disabled={selectedStorageNo !== null}
             >
               <option value="">선택 안 함</option>
               {groups.map((g) => (
@@ -137,7 +136,6 @@ export default function SaveTipModal({ tipId, onClose }: Props) {
                 </option>
               ))}
             </select>
-            {/* 커스텀 화살표 */}
             <span className={chevron}>
               <svg
                 width="18"

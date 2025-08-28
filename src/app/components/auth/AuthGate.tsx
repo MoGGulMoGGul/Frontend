@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const PUBLIC_PATHS = ["/login", "/signup"];
@@ -9,7 +9,6 @@ const PUBLIC_PATHS = ["/login", "/signup"];
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const accessToken = useAuthStore((s) => s.accessToken);
   const refreshToken = useAuthStore((s) => s.refreshToken);
@@ -40,7 +39,6 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     }
 
     // 여기서부터: 비공개 경로 + accessToken 없음
-    // refreshToken 이 있고 아직 시도 안했으면 자동 갱신 1회 시도
     const doWork = async () => {
       if (refreshToken && !triedRefresh.current) {
         triedRefresh.current = true;
@@ -54,24 +52,16 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       // 갱신 결과 재확인
       const tokenNow = useAuthStore.getState().accessToken;
       if (!tokenNow) {
-        const next = `${pathname}${
-          searchParams?.toString() ? `?${searchParams}` : ""
-        }`;
+        const search =
+          typeof window !== "undefined" ? window.location.search : "";
+        const next = `${pathname ?? ""}${search ?? ""}`;
         router.replace(`/login?next=${encodeURIComponent(next)}`);
       }
       setReady(true);
     };
 
     void doWork();
-  }, [
-    accessToken,
-    isPublic,
-    pathname,
-    searchParams,
-    router,
-    hasHydrated,
-    refreshToken,
-  ]);
+  }, [accessToken, isPublic, pathname, router, hasHydrated, refreshToken]);
 
   if (!ready && !isPublic) {
     return (
