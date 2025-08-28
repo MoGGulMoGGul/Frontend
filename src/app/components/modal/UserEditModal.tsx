@@ -10,7 +10,7 @@ import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 type Props = {
   onClose: () => void;
   initialNickname: string;
-  initialImageUrl: string;
+  initialImageUrl?: string | null;
   onSaved?: (message?: string) => void;
 };
 

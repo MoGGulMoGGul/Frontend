@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/common/SearchBar";
 import ModalDetailContent from "@/app/components/modal/ModalDetailContent";
 import HexGridWithData from "@/app/components/grid/HexGridWithData";
@@ -17,19 +17,20 @@ import {
 import { getUserTips, type MyTipItem } from "@/lib/tips";
 import { useAuthStore } from "@/stores/useAuthStore";
 
-// 모달 컴포넌트 임포트
+// 모달 컴포넌트
 import FollowerListModal from "@/app/components/common/FollowerListModal";
 import FollowingListModal from "@/app/components/common/FollowingListModal";
 import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function UserFeedPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { userNo } = useParams<{ userNo: string }>();
-  const id = Number(userNo);
-  const invalidParam = !Number.isFinite(id);
 
-  const modalId = searchParams.get("modal");
+  const id = useMemo(() => {
+    if (typeof window === "undefined") return NaN;
+    const sp = new URLSearchParams(window.location.search);
+    return Number(sp.get("userNo") ?? NaN);
+  }, []);
+  const invalidParam = !Number.isFinite(id);
 
   const myUserNo = useAuthStore((s) => s.userNo);
   const incFollowing = useAuthStore((s) => s.incFollowing);
@@ -136,6 +137,10 @@ export default function UserFeedPage() {
     }
   };
 
+  if (!Number.isFinite(id)) {
+    return <main className="p-6">잘못된 경로입니다.</main>;
+  }
+
   return (
     <div>
       <SearchBar />
@@ -173,7 +178,7 @@ export default function UserFeedPage() {
                 </div>
               </div>
 
-              {/* 가운데: 팔로워 수 ─ 클릭 시 모달 오픈 */}
+              {/* 가운데: 팔로워 수 (모달) */}
               <button
                 type="button"
                 onClick={() => setOpenFollowers(true)}
@@ -199,7 +204,7 @@ export default function UserFeedPage() {
                 </div>
               </button>
 
-              {/* 오른쪽: 팔로잉 수 ─ 클릭 시 모달 오픈 */}
+              {/* 오른쪽: 팔로잉 수 (모달) */}
               <button
                 type="button"
                 onClick={() => setOpenFollowings(true)}
@@ -225,7 +230,7 @@ export default function UserFeedPage() {
                 </div>
               </button>
 
-              {/* 팔로우/언팔로우 토글 버튼 */}
+              {/* 팔로우/언팔 토글 */}
               <button
                 onClick={handleToggleFollow}
                 disabled={processing}
@@ -235,7 +240,7 @@ export default function UserFeedPage() {
                     ? "bg-[var(--color-honey-pale)] border-[var(--color-honey-pale)]"
                     : "bg-white border-[var(--color-honey-pale)] hover:bg-[var(--color-honey-pale)]",
                 ].join(" ")}
-                aria-pressed={profile.isFollowing}
+                aria-pressed={profile.isFollowing ?? undefined}
                 aria-label={profile.isFollowing ? "언팔로우" : "팔로우"}
                 title={profile.isFollowing ? "언팔로우" : "팔로우"}
               >
@@ -259,7 +264,7 @@ export default function UserFeedPage() {
           )}
         </div>
 
-        {/* 특정 사용자 꿀팁을 헥사곤 그리드로 표시 */}
+        {/* 특정 사용자 꿀팁 그리드 */}
         <HexGridWithData<MyTipItem>
           fetcher={() => getUserTips(id)}
           mapItem={(t) => ({ id: t.no, label: t.title || "(제목 없음)" })}
@@ -267,23 +272,20 @@ export default function UserFeedPage() {
           totalSlots={30}
           cols={5}
           emptyBg="#D9D9D9"
-          onCardClick={(tipId) => router.push(`?modal=${tipId}`)}
+          onCardClick={(tipId) => {
+            const sp = new URLSearchParams(window.location.search);
+            sp.set("modal", String(tipId));
+            router.push(`?${sp.toString()}`);
+          }}
         />
       </div>
 
-      {/* 꿀팁 상세 모달 (?modal=tipId) */}
-      {modalId && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg">
-            <ModalDetailContent
-              id={parseInt(modalId)}
-              onClose={() => router.back()}
-            />
-          </div>
-        </div>
-      )}
+      {/*얇은 모달 레이어: useSearchParams 사용 */}
+      <Suspense fallback={null}>
+        <ModalLayer />
+      </Suspense>
 
-      {/* 팔로워 / 팔로잉 모달 렌더링 */}
+      {/* 팔로워 / 팔로잉 모달 */}
       {openFollowers && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <FollowerListModal
@@ -300,6 +302,24 @@ export default function UserFeedPage() {
           />
         </div>
       )}
+    </div>
+  );
+}
+
+function ModalLayer() {
+  const router = useRouter();
+  const sp = useSearchParams();
+  const modalId = sp.get("modal");
+  if (!modalId) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-lg">
+        <ModalDetailContent
+          id={parseInt(modalId)}
+          onClose={() => router.back()}
+        />
+      </div>
     </div>
   );
 }

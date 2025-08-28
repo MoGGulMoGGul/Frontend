@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import CommonModal from "@/app/components/modal/CommonModal";
 import ModalDetailContent from "@/app/components/modal/ModalDetailContent";
 import SearchBar from "@/app/components/common/SearchBar";
@@ -16,14 +16,17 @@ import {
   type TipSearchItem as StorageTipItem,
 } from "@/lib/storage";
 
-type RouteParams = { groupNo: string; storageNo: string };
-
 export default function GrouptipStoragePage() {
   const router = useRouter();
-  const { groupNo: groupNoStr, storageNo: storageNoStr } =
-    useParams() as RouteParams;
-  const groupNo = Number(groupNoStr);
-  const storageNo = Number(storageNoStr);
+
+  const { groupNo, storageNo } = useMemo(() => {
+    if (typeof window === "undefined") return { groupNo: NaN, storageNo: NaN };
+    const sp = new URLSearchParams(window.location.search);
+    return {
+      groupNo: Number(sp.get("groupNo") ?? NaN),
+      storageNo: Number(sp.get("storageNo") ?? NaN),
+    };
+  }, []);
 
   const [name, setName] = useState("");
   const [loadingHeader, setLoadingHeader] = useState(true);
@@ -40,13 +43,10 @@ export default function GrouptipStoragePage() {
   const [renameValue, setRenameValue] = useState("");
   const [showDelete, setShowDelete] = useState(false);
 
-  const searchParams = useSearchParams();
-  const modalId = searchParams.get("modal");
-
   const [infoModal, setInfoModal] = useState<null | { message: string }>(null);
   const openInfo = (message: string) => setInfoModal({ message });
 
-  // 헤더 + 기본 목록 로딩
+  // 헤더 + 기본 목록 로딩 (원래 흐름 유지)
   useEffect(() => {
     if (!Number.isFinite(groupNo) || !Number.isFinite(storageNo)) return;
 
@@ -74,7 +74,7 @@ export default function GrouptipStoragePage() {
       }
     })();
 
-    // 본문(꿀팁 목록)은 그대로 유지: /api/query/storage/:storageNo
+    // 본문(꿀팁 목록): /api/query/storage/:storageNo
     (async () => {
       try {
         const tips = await getStorageTips(storageNo);
@@ -120,7 +120,8 @@ export default function GrouptipStoragePage() {
       setActionLoading(true);
       await deleteStorage(storageNo);
       setShowDelete(false);
-      router.push(`/grouptip/${groupNo}`);
+      // 쿼리 기반 목록 페이지로 이동
+      router.push(`/grouptip?groupNo=${groupNo}`);
     } catch (e) {
       console.error(e);
       openInfo("보관함 삭제에 실패했습니다.");
@@ -151,7 +152,8 @@ export default function GrouptipStoragePage() {
           </div>
         </CommonModal>
       )}
-      {/*  그룹 단위 검색으로 변경: /api/search/tips/group/{groupId} */}
+
+      {/* 그룹 단위 검색 */}
       <SearchBar
         placeholder="이 그룹에서 꿀팁 검색"
         onSearch={(q) => {
@@ -167,7 +169,7 @@ export default function GrouptipStoragePage() {
       />
 
       <div className="relative p-6 pt-0">
-        {/* 이름 변경 모달 */}
+        {/* 이름 변경 모달 (handleRenameSave 사용) */}
         {showRename && (
           <CommonModal>
             <div>
@@ -279,22 +281,39 @@ export default function GrouptipStoragePage() {
             totalSlots={30}
             cols={5}
             emptyBg="#D9D9D9"
-            onCardClick={(id) => router.push(`?modal=${id}`)}
+            onCardClick={(id) => {
+              // 기존 쿼리 유지 + modal만 추가
+              const sp = new URLSearchParams(window.location.search);
+              sp.set("modal", String(id));
+              router.push(`?${sp.toString()}`);
+            }}
           />
         )}
 
-        {/* 쿼리 기반 모달 */}
-        {modalId && (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg">
-              <ModalDetailContent
-                id={parseInt(modalId)}
-                onClose={() => router.back()}
-              />
-            </div>
-          </div>
-        )}
+        {/* 얇은 모달 레이어: 여기서만 useSearchParams 사용 */}
+        <Suspense fallback={null}>
+          <ModalLayer />
+        </Suspense>
       </div>
     </>
+  );
+}
+
+function ModalLayer() {
+  const router = useRouter();
+  const sp = useSearchParams();
+  const modalId = sp.get("modal");
+
+  if (!modalId) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-lg">
+        <ModalDetailContent
+          id={parseInt(modalId)}
+          onClose={() => router.back()}
+        />
+      </div>
+    </div>
   );
 }

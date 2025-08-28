@@ -110,15 +110,13 @@ export const useAuthStore = create<AuthState>()(
 
       // 프로필 즉시 로드 & 저장
       loadUserProfile: async (userNo: number) => {
-        const data: ApiUserProfile = await getUserProfile(userNo);
+        const data = await getUserProfile(userNo);
         set({
-          // 식별 필드 최신화 (loginId -> login)
-          login: data.loginId,
-          nickname: data.nickname,
-          userNo: data.userNo,
+          login: data.loginId ?? null,
+          nickname: data.nickname ?? null,
+          userNo: data.userNo ?? null,
 
-          // 상세 프로필 저장
-          profileImageUrl: data.profileImageUrl ?? null,
+          profileImageUrl: data.profileImageUrl,
           followerCount: data.followerCount ?? 0,
           followingCount: data.followingCount ?? 0,
           totalBookmarkCount: data.totalBookmarkCount ?? 0,

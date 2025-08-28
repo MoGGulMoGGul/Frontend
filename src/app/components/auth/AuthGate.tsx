@@ -20,10 +20,23 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const [ready, setReady] = useState(isPublic);
-  const triedRefresh = useRef(false); // 새로고침 직후 1회만 리프레시 시도
+  const triedRefresh = useRef(false);
+
+  //하이드레이션이 끝난후, 보호 경로인데 액세스/리프레시 둘 다 없으면 즉시 로그인으로
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (isPublic) return;
+
+    if (!accessToken && !refreshToken) {
+      const search =
+        typeof window !== "undefined" ? window.location.search : "";
+      const next = `${pathname ?? ""}${search ?? ""}`;
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
+      return; // 여기서 끝
+    }
+  }, [hasHydrated, isPublic, accessToken, refreshToken, pathname, router]);
 
   useEffect(() => {
-    // 로컬스토리지 복원되기 전엔 아무 것도 하지 않음
     if (!hasHydrated) return;
 
     // 공개 경로는 바로 렌더
@@ -32,31 +45,32 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // 이미 accessToken 있으면 패스
+    // 액세스 토큰 있으면 렌더
     if (accessToken) {
       setReady(true);
       return;
     }
 
-    // 여기서부터: 비공개 경로 + accessToken 없음
+    // 여기부터 보호 경로 + 액세스 없음 (리프레시 있으면 한 번 시도)
     const doWork = async () => {
       if (refreshToken && !triedRefresh.current) {
         triedRefresh.current = true;
         try {
-          await useAuthStore.getState().refreshTokens(); // ⚡ 토큰 재발급 시도
+          await useAuthStore.getState().refreshTokens();
         } catch {
-          // 실패해도 흐름 계속
+          // 실패해도 아래에서 처리
         }
       }
 
-      // 갱신 결과 재확인
       const tokenNow = useAuthStore.getState().accessToken;
       if (!tokenNow) {
         const search =
           typeof window !== "undefined" ? window.location.search : "";
         const next = `${pathname ?? ""}${search ?? ""}`;
         router.replace(`/login?next=${encodeURIComponent(next)}`);
+        return;
       }
+
       setReady(true);
     };
 

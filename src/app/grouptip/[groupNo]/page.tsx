@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import CommonModal from "../../components/modal/CommonModal";
 import OkBtn from "../../components/common/OkBtn";
@@ -33,8 +33,12 @@ import InviteMembersModal from "@/app/components/group/InviteMembersModal";
 
 export default function GrouptipGroupPage() {
   const router = useRouter();
-  const params = useParams<{ groupNo: string }>();
-  const groupNo = Number(params?.groupNo ?? NaN);
+  const groupNo = useMemo(() => {
+    if (typeof window === "undefined") return NaN;
+    const params = new URLSearchParams(window.location.search);
+    const v = Number(params.get("groupNo") ?? NaN);
+    return v;
+  }, []);
   const isValidParams = Number.isFinite(groupNo);
 
   // 토큰/스토어 하이드레이션 대기
@@ -170,7 +174,9 @@ export default function GrouptipGroupPage() {
       const res = await createStorage({ name, groupNo });
       setIsModalOpen(false);
       setForm({ name: "" });
-      router.push(`/grouptip/${groupNo}/${res.storageNo}`);
+      router.push(
+        `/grouptip/storage?groupNo=${groupNo}&storageNo=${res.storageNo}`
+      );
     } catch (e) {
       console.error(e);
       setInviteResult("보관함 생성에 실패했습니다.");
@@ -284,7 +290,7 @@ export default function GrouptipGroupPage() {
                   {storages.map((s) => (
                     <Link
                       key={s.storageNo}
-                      href={`/grouptip/${groupNo}/${s.storageNo}`}
+                      href={`/grouptip/storage?groupNo=${groupNo}&storageNo=${s.storageNo}`}
                       className="flex flex-col items-center hover:cursor-pointer"
                     >
                       <div className="relative mb-3">

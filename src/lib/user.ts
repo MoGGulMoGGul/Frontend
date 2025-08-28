@@ -16,11 +16,11 @@ export type UserProfile = {
   userNo: number;
   loginId: string;
   nickname: string;
-  profileImageUrl: string;
+  profileImageUrl?: string | null;
   followerCount: number;
   followingCount: number;
   totalBookmarkCount: number;
-  isFollowing: boolean;
+  isFollowing: boolean | null;
 };
 
 export type FollowUserItem = {
