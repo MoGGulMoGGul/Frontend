@@ -79,7 +79,7 @@ export default function MyPage() {
       setShowCreateStorage(false);
       setNewStorageName("");
       openToast("보관함이 생성되었습니다.");
-      router.push(`/mytip/${created.storageNo}`);
+      router.push(`/mytip/storage?storageNo=${created.storageNo}`);
     } catch (e) {
       console.error(e);
       openToast("보관함 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.");
@@ -266,7 +266,7 @@ export default function MyPage() {
                 {personalFolders.map((folder) => (
                   <Link
                     key={folder.id}
-                    href={`/mytip/${folder.id}`}
+                    href={`/mytip/storage?storageNo=${folder.id}`}
                     className="flex flex-col hover:cursor-pointer font-bold"
                     title={folder.name}
                     prefetch={false}

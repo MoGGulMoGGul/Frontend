@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/common/SearchBar";
@@ -16,20 +16,15 @@ import {
 } from "@/lib/user";
 import { getUserTips, type MyTipItem } from "@/lib/tips";
 import { useAuthStore } from "@/stores/useAuthStore";
-
-// 모달 컴포넌트
 import FollowerListModal from "@/app/components/common/FollowerListModal";
 import FollowingListModal from "@/app/components/common/FollowingListModal";
 import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function UserFeedPage() {
   const router = useRouter();
+  const sp = useSearchParams();
 
-  const id = useMemo(() => {
-    if (typeof window === "undefined") return NaN;
-    const sp = new URLSearchParams(window.location.search);
-    return Number(sp.get("userNo") ?? NaN);
-  }, []);
+  const id = Number(sp.get("userNo") ?? NaN);
   const invalidParam = !Number.isFinite(id);
 
   const myUserNo = useAuthStore((s) => s.userNo);
@@ -74,6 +69,7 @@ export default function UserFeedPage() {
     return () => {
       alive = false;
     };
+    // sp는 객체 동일성이 바뀔 수 있으므로 id만 의존
   }, [id, invalidParam]);
 
   const handleToggleFollow = async () => {
@@ -89,7 +85,7 @@ export default function UserFeedPage() {
     const currentIsFollow = !!profile.isFollowing;
     const delta = currentIsFollow ? -1 : 1;
 
-    // 상대 프로필 화면값 즉시 반영
+    // UI 낙관적 업데이트
     setProfile((prev) =>
       prev
         ? {
@@ -102,7 +98,6 @@ export default function UserFeedPage() {
           }
         : prev
     );
-    // 내 followingCount 전역 반영
     incFollowing(delta);
 
     try {
@@ -111,12 +106,10 @@ export default function UserFeedPage() {
       } else {
         await followUser(profile.loginId);
       }
-
-      // 내 카운트 최신 동기화
       const freshMe = await getUserProfile(myUserNo);
       setCountsFromProfile(freshMe);
     } catch (e) {
-      // 실패 롤백
+      // 롤백
       setProfile((prev) =>
         prev
           ? {
@@ -137,7 +130,7 @@ export default function UserFeedPage() {
     }
   };
 
-  if (!Number.isFinite(id)) {
+  if (invalidParam) {
     return <main className="p-6">잘못된 경로입니다.</main>;
   }
 
@@ -273,14 +266,14 @@ export default function UserFeedPage() {
           cols={5}
           emptyBg="#D9D9D9"
           onCardClick={(tipId) => {
-            const sp = new URLSearchParams(window.location.search);
-            sp.set("modal", String(tipId));
-            router.push(`?${sp.toString()}`);
+            const next = new URLSearchParams(sp.toString());
+            next.set("modal", String(tipId));
+            router.push(`?${next.toString()}`);
           }}
         />
       </div>
 
-      {/*얇은 모달 레이어: useSearchParams 사용 */}
+      {/* 얇은 모달 레이어 */}
       <Suspense fallback={null}>
         <ModalLayer />
       </Suspense>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import BoldLabeledField from "@/app/components/form/BoldLabeledInput";
 import { getTipDetail, updateTip } from "@/lib/tips";
 import { extractApiErrorMessage } from "@/lib/error";
@@ -13,9 +13,9 @@ import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 import SearchBar from "@/app/components/common/SearchBar";
 
 export default function EditTipPage() {
-  const { id } = useParams<{ id: string }>();
-  const tipId = Number(id);
   const router = useRouter();
+  const sp = useSearchParams();
+  const tipId = useMemo(() => Number(sp.get("id") ?? NaN), [sp]); //?id= 로 읽음
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -102,7 +102,6 @@ export default function EditTipPage() {
 
   return (
     <>
-      {/* 검색어 입력 시 /search로 이동 (scope=public) */}
       <SearchBar
         placeholder="전체 꿀팁 검색"
         onSearch={(q) => {
@@ -116,7 +115,6 @@ export default function EditTipPage() {
         <div className="flex flex-col">
           <div className="flex items-stretch gap-11 mb-20">
             <div className="w-1/2 bg-[#f7f7f7] border-2 border-dashed border-gray-300 flex flex-col items-center rounded-md p-6">
-              {/* 썸네일이 있을 때만 표시 */}
               {thumbnailUrl && (
                 <div className="w-full max-w-[520px] mb-4">
                   <div className="relative aspect-video w-full overflow-hidden rounded-md border border-gray-200 bg-white">
@@ -126,7 +124,6 @@ export default function EditTipPage() {
                       fill
                       sizes="(max-width: 768px) 100vw, 520px"
                       style={{ objectFit: "contain" }}
-                      // 외부 도메인일 경우 next.config.js 이미지 도메인 설정 필요
                     />
                   </div>
                 </div>
@@ -139,7 +136,6 @@ export default function EditTipPage() {
               </div>
             </div>
 
-            {/* 오른쪽: 메타 입력 */}
             <div className="w-1/2">
               <BoldLabeledField
                 label="제목"
@@ -184,7 +180,6 @@ export default function EditTipPage() {
             </div>
           </div>
 
-          {/* 액션 */}
           <div className="flex items-center gap-2 ml-auto">
             <button
               onClick={handleSave}
@@ -207,7 +202,6 @@ export default function EditTipPage() {
         </div>
       </div>
 
-      {/*성공 모달 */}
       {successOpen && (
         <CommonModal>
           <p className="text-center mb-4">수정되었습니다.</p>
@@ -224,7 +218,6 @@ export default function EditTipPage() {
         </CommonModal>
       )}
 
-      {/* (옵션) 에러 모달 */}
       {errorOpen.open && (
         <CommonModal>
           <p className="text-center mb-4">{errorOpen.msg}</p>

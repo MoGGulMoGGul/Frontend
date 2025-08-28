@@ -121,7 +121,7 @@ function Sidebar() {
   const handleAddStorage = async (name: string) => {
     try {
       const created = await addStorage(name.trim());
-      router.push(`/mytip/${created.storageNo}`);
+      router.push(`/mytip/storage?storageNo=${created.storageNo}`);
     } catch {
       openModal("보관함 생성에 실패했습니다.");
     }

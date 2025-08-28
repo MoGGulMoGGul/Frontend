@@ -199,7 +199,7 @@ export default function ModalDetailContent({ id, onClose }: Props) {
             닉네임:&nbsp;
             {nickname ? (
               <Link
-                href={`/user/${userNo}`}
+                href={`/user?userNo=${userNo}`}
                 className="text-blue-600 underline"
                 title={nickname}
               >

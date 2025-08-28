@@ -42,7 +42,9 @@ export default function GrouptipPage() {
       const created = await create(name);
       setIsModalOpen(false);
       setForm({ name: "" });
-      router.push(`/grouptip/${encodeURIComponent(created.groupNo)}`);
+      router.push(
+        `/grouptip/group?groupNo=${encodeURIComponent(created.groupNo)}`
+      );
     } catch (err) {
       console.error(err);
       openInfo("그룹 생성에 실패했습니다.");
@@ -118,7 +120,7 @@ export default function GrouptipPage() {
             {groups.map((g) => (
               <Link
                 key={g.groupNo}
-                href={`/grouptip/${g.groupNo}`}
+                href={`/grouptip/group?groupNo=${g.groupNo}`}
                 className="flex flex-col hover:cursor-pointer"
               >
                 <div className="relative mb-3">

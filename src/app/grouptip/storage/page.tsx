@@ -121,7 +121,7 @@ export default function GrouptipStoragePage() {
       await deleteStorage(storageNo);
       setShowDelete(false);
       // 쿼리 기반 목록 페이지로 이동
-      router.push(`/grouptip?groupNo=${groupNo}`);
+      router.push(`/grouptip/group?groupNo=${groupNo}`);
     } catch (e) {
       console.error(e);
       openInfo("보관함 삭제에 실패했습니다.");
