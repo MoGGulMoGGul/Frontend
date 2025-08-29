@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import CommonModal from "../../components/modal/CommonModal";
 import OkBtn from "../../components/common/OkBtn";
@@ -33,30 +33,14 @@ import InviteMembersModal from "@/app/components/group/InviteMembersModal";
 
 export default function GrouptipGroupPage() {
   const router = useRouter();
+  const sp = useSearchParams();
 
-  // 쿼리 파라미터는 마운트 후 한 번만 읽어온다.
-  const [groupNo, setGroupNo] = useState<number | null>(null); // null = 아직 판단 전
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const v = Number(params.get("groupNo") ?? NaN);
-    setGroupNo(Number.isFinite(v) ? v : NaN);
-  }, []);
-
-  // 🔧 최소수정: 히스토리 패치 대신 폴링으로 검색어 변경 감지 (Next 라우터와 충돌 없음)
-  useEffect(() => {
-    let last = window.location.search;
-    const tick = () => {
-      const cur = window.location.search;
-      if (cur !== last) {
-        last = cur;
-        const p = new URLSearchParams(cur);
-        const v = Number(p.get("groupNo") ?? NaN);
-        setGroupNo(Number.isFinite(v) ? v : NaN);
-      }
-    };
-    const id = setInterval(tick, 200);
-    return () => clearInterval(id);
-  }, []);
+  // ✅ useSearchParams로 교체 (옵션 2)
+  const groupNoParam = sp.get("groupNo");
+  const groupNo = useMemo(
+    () => (groupNoParam == null ? null : Number(groupNoParam)),
+    [groupNoParam]
+  );
 
   const isPending = groupNo === null;
   const isValidParams = typeof groupNo === "number" && Number.isFinite(groupNo);
