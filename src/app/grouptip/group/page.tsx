@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import CommonModal from "../../components/modal/CommonModal";
@@ -33,13 +33,33 @@ import InviteMembersModal from "@/app/components/group/InviteMembersModal";
 
 export default function GrouptipGroupPage() {
   const router = useRouter();
-  const groupNo = useMemo(() => {
-    if (typeof window === "undefined") return NaN;
+
+  // 쿼리 파라미터는 마운트 후 한 번만 읽어온다.
+  const [groupNo, setGroupNo] = useState<number | null>(null); // null = 아직 판단 전
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const v = Number(params.get("groupNo") ?? NaN);
-    return v;
+    setGroupNo(Number.isFinite(v) ? v : NaN);
   }, []);
-  const isValidParams = Number.isFinite(groupNo);
+
+  // 🔧 최소수정: 히스토리 패치 대신 폴링으로 검색어 변경 감지 (Next 라우터와 충돌 없음)
+  useEffect(() => {
+    let last = window.location.search;
+    const tick = () => {
+      const cur = window.location.search;
+      if (cur !== last) {
+        last = cur;
+        const p = new URLSearchParams(cur);
+        const v = Number(p.get("groupNo") ?? NaN);
+        setGroupNo(Number.isFinite(v) ? v : NaN);
+      }
+    };
+    const id = setInterval(tick, 200);
+    return () => clearInterval(id);
+  }, []);
+
+  const isPending = groupNo === null;
+  const isValidParams = typeof groupNo === "number" && Number.isFinite(groupNo);
 
   // 토큰/스토어 하이드레이션 대기
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
@@ -69,12 +89,20 @@ export default function GrouptipGroupPage() {
   const [storages, setStorages] = useState<GroupStorageItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 그룹이 바뀌면 로딩 플래그 리셋
+  useEffect(() => {
+    if (groupNo !== null) {
+      setHeaderLoading(true);
+      setLoading(true);
+    }
+  }, [groupNo]);
+
   /* ---- 헤더 로딩 (그룹명) ---- */
   useEffect(() => {
     let alive = true;
 
-    // 하이드레이션 완료 전에는 아무 것도 안 함
-    if (!hasHydrated) return;
+    // 하이드레이션/쿼리 파싱 완료 전에는 스킵
+    if (!hasHydrated || groupNo === null) return;
 
     (async () => {
       try {
@@ -131,8 +159,8 @@ export default function GrouptipGroupPage() {
   useEffect(() => {
     let alive = true;
 
-    // 하이드레이션 전이면 스킵(권한 필요 가능성)
-    if (!hasHydrated) return;
+    // 하이드레이션/쿼리 파싱 완료 전에는 스킵
+    if (!hasHydrated || groupNo === null) return;
 
     (async () => {
       try {
@@ -171,11 +199,11 @@ export default function GrouptipGroupPage() {
       return;
     }
     try {
-      const res = await createStorage({ name, groupNo });
+      const res = await createStorage({ name, groupNo: groupNo! });
       setIsModalOpen(false);
       setForm({ name: "" });
       router.push(
-        `/grouptip/storage?groupNo=${groupNo}&storageNo=${res.storageNo}`
+        `/grouptip/storage?groupNo=${groupNo!}&storageNo=${res.storageNo}`
       );
     } catch (e) {
       console.error(e);
@@ -188,7 +216,7 @@ export default function GrouptipGroupPage() {
     try {
       setMembersLoading(true);
       setShowMembers(true);
-      const list = await getGroupMembers(groupNo);
+      const list = await getGroupMembers(groupNo!);
       setMembers(list);
     } catch (e) {
       console.error("멤버 조회 실패:", e);
@@ -203,7 +231,7 @@ export default function GrouptipGroupPage() {
   const handleLeaveGroup = async () => {
     try {
       setLeaveLoading(true);
-      await leaveGroup(groupNo);
+      await leaveGroup(groupNo!);
       setShowLeave(false);
       router.push("/grouptip");
     } catch (e) {
@@ -226,7 +254,7 @@ export default function GrouptipGroupPage() {
           if (!keyword) return;
           const params = new URLSearchParams({
             scope: "group",
-            groupId: String(groupNo),
+            groupId: String(groupNo!),
             q: keyword,
           });
           router.push(`/search?${params.toString()}`);
@@ -234,7 +262,9 @@ export default function GrouptipGroupPage() {
       />
 
       <div className="relative p-6 pt-0">
-        {!isValidParams ? (
+        {isPending ? (
+          <main className="p-4">불러오는 중...</main>
+        ) : !isValidParams ? (
           <main className="p-4">잘못된 경로입니다.</main>
         ) : (
           <>
@@ -290,7 +320,9 @@ export default function GrouptipGroupPage() {
                   {storages.map((s) => (
                     <Link
                       key={s.storageNo}
-                      href={`/grouptip/storage?groupNo=${groupNo}&storageNo=${s.storageNo}`}
+                      href={`/grouptip/storage?groupNo=${groupNo!}&storageNo=${
+                        s.storageNo
+                      }`}
                       className="flex flex-col items-center hover:cursor-pointer"
                     >
                       <div className="relative mb-3">
@@ -387,7 +419,7 @@ export default function GrouptipGroupPage() {
 
         {showInvite && (
           <InviteMembersModal
-            groupNo={groupNo}
+            groupNo={groupNo!}
             onClose={() => setShowInvite(false)}
             onInvited={(n) => {
               setInviteResult(`초대 완료: ${n}명`);

@@ -213,6 +213,7 @@ function Sidebar() {
                 onRenameFolder={handleRenameStorage}
                 onDeleteFolder={handleDeleteStorage}
                 entityLabel="보관함"
+                linkBuilder={(id) => `/mytip/storage?storageNo=${id}`}
               />
 
               <MenuItem icon="🔎" label="검색하기" href="/" />
@@ -228,6 +229,7 @@ function Sidebar() {
                 onRenameFolder={handleRenameGroup}
                 onDeleteFolder={handleDeleteGroup}
                 entityLabel="그룹"
+                linkBuilder={(id) => `/grouptip/group?groupNo=${id}`}
               />
 
               <MenuItem icon="🏆" label="주간 꿀팁 챌린지" href="/challenge" />

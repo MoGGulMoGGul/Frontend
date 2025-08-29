@@ -23,6 +23,7 @@ interface MenuItemsProps {
   onAdd?: (name: string) => Promise<void> | void;
   onRenameFolder?: (id: number, newName: string) => Promise<void> | void;
   onDeleteFolder?: (id: number) => Promise<void> | void;
+  linkBuilder?: (id: number) => string;
   /** 모달 문구에 표시할 엔티티명 ("그룹" | "보관함") */
   entityLabel?: string;
   /** 닫힘→열림 될 때 한 번 호출 (목록 로드 트리거용) */
@@ -38,6 +39,7 @@ export default function MenuItem({
   onAdd,
   onRenameFolder,
   onDeleteFolder,
+  linkBuilder,
   entityLabel = "항목",
   onExpand,
 }: MenuItemsProps) {
@@ -269,6 +271,7 @@ export default function MenuItem({
 
       <Link
         href={href}
+        prefetch={false}
         className="h-12 flex items-center place-content-between text-lg"
         onClick={toggleArrow}
       >
@@ -333,7 +336,8 @@ export default function MenuItem({
             {folders.map((f) => (
               <li key={f.id}>
                 <Link
-                  href={`${href}/${f.id}`}
+                  href={linkBuilder ? linkBuilder(f.id) : `${href}/${f.id}`}
+                  prefetch={false}
                   onClick={() => setActiveFolderId(f.id)}
                   className={`py-1 cursor-pointer flex items-center justify-between px-4 rounded-lg
                     ${

@@ -12,19 +12,23 @@ import { getStorageTips } from "@/lib/storage";
 
 export default function MyDetailTipPage() {
   const router = useRouter();
+  const sp = useSearchParams();
 
-  // 쿼리에서 storageNo 읽기 (정적 배포 호환)
-  const storageNo = useMemo(() => {
-    if (typeof window === "undefined") return NaN;
-    const sp = new URLSearchParams(window.location.search);
-    return Number(sp.get("storageNo") ?? NaN);
-  }, []);
+  // 훅들 최상단 고정
+  const storageNoParam = sp.get("storageNo");
+  const storageNo = useMemo(
+    () => (storageNoParam == null ? null : Number(storageNoParam)),
+    [storageNoParam]
+  );
 
+  // 이후에 분기
+  if (storageNo === null) {
+    return <main className="p-6">불러오는 중...</main>;
+  }
   if (!Number.isFinite(storageNo)) {
     return <main className="p-6">잘못된 경로입니다.</main>;
   }
 
-  // HexGrid 매퍼 (원본 유지)
   const mapItem = (t: { id: number; title?: string }): HexItem => ({
     id: t.id,
     label: t.title || "(제목 없음)",
@@ -32,7 +36,6 @@ export default function MyDetailTipPage() {
 
   return (
     <>
-      {/* 검색: 입력 시 /search로 이동 */}
       <SearchBar
         placeholder="이 보관함에서 꿀팁 검색"
         onSearch={(q) => {
@@ -48,7 +51,6 @@ export default function MyDetailTipPage() {
       />
 
       <div className="p-6 pt-0">
-        {/* 기본 모드: 해당 보관함 꿀팁 목록 */}
         <HexGridWithData<{ id: number; title?: string }>
           fetcher={() => getStorageTips(storageNo)}
           mapItem={mapItem}
@@ -57,14 +59,12 @@ export default function MyDetailTipPage() {
           cols={5}
           emptyBg="#D9D9D9"
           onCardClick={(id) => {
-            // 기존 쿼리 유지 + modal만 추가
-            const sp = new URLSearchParams(window.location.search);
-            sp.set("modal", String(id));
-            router.push(`?${sp.toString()}`);
+            const next = new URLSearchParams(sp.toString());
+            next.set("modal", String(id));
+            router.push(`?${next.toString()}`);
           }}
         />
 
-        {/* 얇은 모달 레이어: useSearchParams 사용 */}
         <Suspense fallback={null}>
           <ModalLayer />
         </Suspense>
@@ -77,7 +77,6 @@ function ModalLayer() {
   const router = useRouter();
   const sp = useSearchParams();
   const modalId = sp.get("modal");
-
   if (!modalId) return null;
 
   return (
