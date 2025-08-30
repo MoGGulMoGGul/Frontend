@@ -10,7 +10,7 @@ import BoldLabeledField from "../components/form/BoldLabeledInput";
 import CommonModal from "../components/modal/CommonModal";
 import OkBtn from "../components/common/OkBtn";
 import SearchBar from "../components/common/SearchBar";
-import { useRouter } from "next/navigation"; // ✅ App Router
+import { useRouter } from "next/navigation";
 import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
 
 export default function NewtipPage() {
@@ -23,18 +23,22 @@ export default function NewtipPage() {
   useEnsureUserStoragesLoaded(userNo);
   const storages = useUserStorageStore((s) => s.storages);
 
+  // --- 입력 상태 (초기엔 3개만 사용) ---
   const [url, setUrl] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [tagsInput, setTagsInput] = useState<string>("");
-  const [isPublic, setIsPublic] = useState<boolean>(true);
 
-  const [draftId, setDraftId] = useState<number | null>(null);
+  // --- 생성 후 추가 입력 ---
+  const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [storageNo, setStorageNo] = useState<number | "">("");
+
+  // --- 응답/진행 상태 ---
+  const [hasDraft, setHasDraft] = useState<boolean>(false); // ← draftId 대신 단계 전환 플래그
   const [summary, setSummary] = useState<string>("");
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+
   const [summarizing, setSummarizing] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
-
-  const [storageNo, setStorageNo] = useState<number | "">("");
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   const [infoModal, setInfoModal] = useState<null | {
     message: string;
@@ -44,13 +48,13 @@ export default function NewtipPage() {
   const openInfo = (message: string, onConfirm?: () => void) => {
     setInfoModal({ message, onConfirm });
   };
-
   const handleModalClose = () => {
-    const callback = infoModal?.onConfirm;
+    const cb = infoModal?.onConfirm;
     setInfoModal(null);
-    if (callback) callback();
+    if (cb) cb();
   };
 
+  // 드래그로 URL 입력
   const onDrop: React.DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -59,16 +63,18 @@ export default function NewtipPage() {
       e.dataTransfer.getData("text/plain");
     if (droppedText) {
       setUrl(droppedText.trim());
+      // 새 URL이면 이전 초안 상태 초기화
+      setHasDraft(false);
+      setSummary("");
       setThumbnailUrl(null);
-      setDraftId(null); // URL 바뀌면 이전 초안 무효화(안전)
     }
   };
-
   const onDragOver: React.DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
+  // 파생값
   const tags = useMemo(
     () =>
       tagsInput
@@ -77,11 +83,13 @@ export default function NewtipPage() {
         .filter(Boolean),
     [tagsInput]
   );
-
   const validUrl = useMemo(() => /^https?:\/\/\S+$/i.test(url), [url]);
-  const canSummarize = validUrl && !summarizing;
-  const canSave = draftId !== null && !saving && storageNo !== "";
 
+  // 단계 플래그
+  const canSummarize = validUrl && !summarizing; // 1단계 버튼
+  const canSave = hasDraft && !saving && storageNo !== ""; // 2단계 버튼
+
+  // 1단계: 요약 생성(/api/tips/generate)
   const handleSummarize = async () => {
     if (!validUrl) {
       openInfo("올바른 URL을 입력하거나 드래그해 주세요.");
@@ -89,7 +97,7 @@ export default function NewtipPage() {
     }
     try {
       setSummarizing(true);
-      setDraftId(null);
+      setHasDraft(false);
       setSummary("");
       setThumbnailUrl(null);
 
@@ -99,16 +107,17 @@ export default function NewtipPage() {
         tags: tags.length ? tags : undefined,
       });
 
-      setDraftId(res.no);
-      setSummary(res.contentSummary || "");
-
+      // 초안 응답 세팅
+      setSummary(res.summary ?? ""); // ← 초안 요약을 바로 표시
       if (!title && res.title) setTitle(res.title);
       if (!tagsInput && Array.isArray(res.tags) && res.tags.length > 0) {
         setTagsInput(res.tags.join(", "));
       }
-      if (res.thumbnailUrl) {
-        setThumbnailUrl(res.thumbnailUrl);
-      }
+      const thumb = res.thumbnailImageUrl ?? null;
+      if (thumb) setThumbnailUrl(thumb);
+
+      // 등록 단계 UI 오픈
+      setHasDraft(true);
     } catch (e) {
       console.error("요약 생성 실패:", e);
       openInfo("요약 생성에 실패했습니다.");
@@ -117,14 +126,27 @@ export default function NewtipPage() {
     }
   };
 
+  // 2단계: 등록(/api/tips/register) — 명세 7개 필드만 전송
   const handleSave = async () => {
     if (!canSave || typeof storageNo !== "number") return;
+
+    const finalTitle = (title || "").trim();
+    const finalSummary = (summary || "").trim();
+    if (!finalTitle || !finalSummary) {
+      openInfo("제목과 요약은 필수입니다.");
+      return;
+    }
+
     try {
       setSaving(true);
       await registerTip({
-        tipNo: draftId as number,
-        isPublic,
+        url,
+        title: finalTitle,
+        summary: finalSummary,
+        thumbnailImageUrl: thumbnailUrl || "",
+        tags,
         storageNo,
+        isPublic,
       });
       openInfo("꿀팁이 저장되었습니다!", onClose);
     } catch (e) {
@@ -137,18 +159,15 @@ export default function NewtipPage() {
 
   const thumbSrc = resolveLocalThumb(thumbnailUrl, "");
 
-  // 공통 입력 스타일
+  // 공통 스타일
   const fieldBase =
-    "w-full max-w-[520px] h-11 px-3 rounded-md bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 " +
-    "focus:outline-none focus:ring-0 focus:border-gray-300";
-
+    "w-full max-w-[520px] h-11 px-3 rounded-md bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-300";
   const selectBase =
-    "w-full h-10 rounded-md px-3 bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 " +
-    "focus:outline-none focus:ring-0 focus:border-gray-300";
+    "w-full h-10 rounded-md px-3 bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-300";
 
   return (
     <>
-      {/* 검색어 입력 시 /search로 이동 (scope=public) */}
+      {/* 상단 검색 */}
       <SearchBar
         placeholder="전체 꿀팁 검색"
         onSearch={(q) => {
@@ -159,6 +178,7 @@ export default function NewtipPage() {
         }}
       />
 
+      {/* 안내 모달 */}
       {infoModal && (
         <CommonModal onClose={handleModalClose}>
           <div className="min-w-[300px] text-center">
@@ -174,13 +194,13 @@ export default function NewtipPage() {
       <div className="relative p-6 pt-0">
         <div className="flex flex-col">
           <div className="flex items-stretch gap-11 mb-20">
-            {/* 왼쪽: 드래그/URL 영역 */}
+            {/* 왼쪽: URL/드롭 영역 (1단계부터 표시) */}
             <div
               onDrop={onDrop}
               onDragOver={onDragOver}
               className="w-1/2 bg-[#f7f7f7] border-2 border-dashed border-gray-300 flex flex-col justify-center items-center rounded-md p-6"
             >
-              {thumbnailUrl ? (
+              {hasDraft && thumbnailUrl ? (
                 <div className="w-full max-w-[520px] mb-4">
                   <div className="relative aspect-video w-full overflow-hidden rounded-md border border-gray-200 bg-white">
                     <Image
@@ -206,8 +226,10 @@ export default function NewtipPage() {
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
+                  // URL 바뀌면 2단계 정보 리셋
                   if (thumbnailUrl) setThumbnailUrl(null);
-                  if (draftId !== null) setDraftId(null);
+                  if (hasDraft) setHasDraft(false);
+                  if (summary) setSummary("");
                 }}
                 placeholder="https://example.com/article..."
                 className={fieldBase}
@@ -220,21 +242,14 @@ export default function NewtipPage() {
               )}
             </div>
 
-            {/* 오른쪽: 메타 입력 */}
+            {/* 오른쪽: 입력 패널 */}
             <div className="w-1/2">
+              {/* 1단계: 제목/태그만 노출 */}
               <BoldLabeledField
                 label="제목"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="입력하지 않으면 AI가 생성해줍니다."
-              />
-
-              <BoldLabeledField
-                label="요약"
-                type="textarea"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                placeholder="요약 결과가 여기에 표시됩니다."
               />
 
               <BoldLabeledField
@@ -244,51 +259,64 @@ export default function NewtipPage() {
                 onChange={(e) => setTagsInput(e.target.value)}
               />
 
-              {/* 공개 설정 */}
-              <div className="mt-4">
-                <div className="font-semibold mb-2">공개 설정</div>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      checked={isPublic}
-                      onChange={() => setIsPublic(true)}
-                    />
-                    공개
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      checked={!isPublic}
-                      onChange={() => setIsPublic(false)}
-                    />
-                    비공개
-                  </label>
-                </div>
-              </div>
+              {/* 2단계부터 요약/공개/보관함 노출 */}
+              {hasDraft && (
+                <>
+                  <BoldLabeledField
+                    label="요약"
+                    type="textarea"
+                    value={summary}
+                    onChange={(e) => setSummary(e.target.value)}
+                    placeholder="요약 결과가 여기에 표시됩니다."
+                  />
 
-              {/* 저장 보관함 선택 */}
-              <div className="mt-6">
-                <div className="font-semibold mb-2">저장할 보관함</div>
-                <select
-                  value={storageNo}
-                  onChange={(e) =>
-                    setStorageNo(e.target.value ? Number(e.target.value) : "")
-                  }
-                  className={selectBase}
-                >
-                  <option value="">보관함을 선택하세요</option>
-                  {storages.map((s) => (
-                    <option key={s.storageNo} value={s.storageNo}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="mt-4">
+                    <div className="font-semibold mb-2">공개 설정</div>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          checked={isPublic}
+                          onChange={() => setIsPublic(true)}
+                        />
+                        공개
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          checked={!isPublic}
+                          onChange={() => setIsPublic(false)}
+                        />
+                        비공개
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <div className="font-semibold mb-2">저장할 보관함</div>
+                    <select
+                      value={storageNo}
+                      onChange={(e) =>
+                        setStorageNo(
+                          e.target.value ? Number(e.target.value) : ""
+                        )
+                      }
+                      className={selectBase}
+                    >
+                      <option value="">보관함을 선택하세요</option>
+                      {storages.map((s) => (
+                        <option key={s.storageNo} value={s.storageNo}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* 액션 버튼 */}
+          {/* 하단 액션: 1단계(요약하기) → 2단계(저장하기) */}
           <div className="flex items-center gap-2 ml-auto">
             <button
               onClick={handleSummarize}
@@ -302,17 +330,19 @@ export default function NewtipPage() {
               {summarizing ? "요약 중..." : "내용 요약하기"}
             </button>
 
-            <button
-              onClick={handleSave}
-              disabled={!canSave}
-              className={`px-4 h-10 rounded-md ${
-                canSave
-                  ? "bg-[var(--color-honey-light)] hover:opacity-90"
-                  : "bg-gray-200 opacity-60 cursor-not-allowed"
-              }`}
-            >
-              {saving ? "저장 중..." : "저장하기"}
-            </button>
+            {hasDraft && (
+              <button
+                onClick={handleSave}
+                disabled={!canSave}
+                className={`px-4 h-10 rounded-md ${
+                  canSave
+                    ? "bg-[var(--color-honey-light)] hover:opacity-90"
+                    : "bg-gray-200 opacity-60 cursor-not-allowed"
+                }`}
+              >
+                {saving ? "저장 중..." : "저장하기"}
+              </button>
+            )}
 
             <button
               onClick={onClose}

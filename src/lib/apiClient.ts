@@ -110,6 +110,7 @@ type ApiOptions = {
   signal?: AbortSignal;
   /** 기본값 true: 보호 API. false면 퍼블릭(토큰 자동부착/검사 안함) */
   auth?: boolean;
+  timeout?: number;
 };
 
 /* ==================== 공용 호출 함수 ==================== */
@@ -151,6 +152,7 @@ export const apiRequest = async <T = unknown>(
     headers: mergedHeaders,
     signal: options?.signal,
     __skipAuth: options?.auth === false,
+    timeout: options?.timeout,
   };
 
   const isGet = String(method).toUpperCase() === "GET";

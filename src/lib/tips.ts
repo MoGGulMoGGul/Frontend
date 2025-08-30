@@ -1,6 +1,5 @@
 /* ==================== Imports ==================== */
 import { apiRequest } from "@/lib/apiClient";
-import { authHeader } from "@/lib/authHeader";
 
 /* ==================== 타입 ==================== */
 // Tip 생성 관련
@@ -11,37 +10,34 @@ export type CreateTipDraftRequest = {
 };
 
 export type TipDraftResponse = {
-  no: number;
   title: string | null;
-  contentSummary: string; // "요약 생성 중...(taskId: ...)" 가능
-  url: string;
-  nickname: string;
-  thumbnailUrl?: string | null;
-  isPublic: boolean;
+  summary: string;
   tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  userNo: number;
+  thumbnailImageUrl: string | null;
 };
 
-// Tip 등록 관련
+// Tip 등록 관련 (명세의 7개 필드만 사용)
 export type RegisterTipRequest = {
-  tipNo: number; // draft id
-  isPublic: boolean;
+  url?: string;
+  title?: string;
+  summary?: string;
+  thumbnailImageUrl?: string;
+  tags?: string[];
   storageNo: number;
+  isPublic: boolean;
 };
 
 export type TipRegisteredResponse = {
-  no: number;
-  title: string;
-  contentSummary: string;
-  url: string;
-  nickname: string;
+  tipNo: number;
+  storageNo: number;
   isPublic: boolean;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
+  summary?: string;
+  url: string;
   userNo: number;
+  nickname: string;
+  thumbnailImageUrl: string | null;
+  title: string;
+  tags: string[];
 };
 
 // 내 꿀팁
@@ -150,18 +146,22 @@ export type AutoCreateTipResponse = {
   createdAt: string;
   updatedAt: string;
 };
+
 /* ==================== API 함수 ==================== */
 /* ----- Create ----- */
-// 꿀팁 초안 생성
+// 꿀팁 초안 생성 (퍼블릭 + 60초)
 export async function createTipDraft(
   data: CreateTipDraftRequest
 ): Promise<TipDraftResponse> {
-  return apiRequest<TipDraftResponse>("POST", "/api/tips/generate", {
+  const res = await apiRequest<TipDraftResponse>("POST", "/api/tips/generate", {
     data,
+    timeout: 60_000, // apiRequest에서 timeout 지원하도록 구현되어 있어야 함
   });
+  console.log("[tips] createTipDraft response:", res);
+  return res;
 }
 
-// 꿀팁 등록
+// 꿀팁 등록 (명세 7개 필드만)
 export async function registerTip(
   data: RegisterTipRequest
 ): Promise<TipRegisteredResponse> {
@@ -170,7 +170,7 @@ export async function registerTip(
   });
 }
 
-// 보관함에 꿀팁 저장
+// 보관함에 꿀팁 저장 (현재 미사용 시 유지)
 export async function saveTipToMyStorage(
   data: SaveTipRequest
 ): Promise<SaveTipResponse> {
@@ -180,7 +180,7 @@ export async function saveTipToMyStorage(
 }
 
 /* ----- Read ----- */
-// 내 꿀팁 목록 조회
+// 내 꿀팁 목록
 export async function getMyTips(): Promise<MyTipItem[]> {
   return apiRequest<MyTipItem[]>("GET", "/api/query/tips/my");
 }
@@ -219,7 +219,6 @@ export async function updateTip(
   body: UpdateTipRequest
 ): Promise<TipDetail> {
   return apiRequest<TipDetail>("PUT", `/api/tips/${tipId}`, {
-    headers: authHeader(),
     data: body,
   });
 }
@@ -227,9 +226,7 @@ export async function updateTip(
 /* ----- Delete ----- */
 // 꿀팁 삭제
 export async function deleteTip(tipId: number): Promise<{ message: string }> {
-  return apiRequest<{ message: string }>("DELETE", `/api/tips/${tipId}`, {
-    headers: authHeader(),
-  });
+  return apiRequest<{ message: string }>("DELETE", `/api/tips/${tipId}`);
 }
 
 /* ----- Bookmark ----- */
@@ -250,7 +247,6 @@ export async function createTipAutoAsync(
     "POST",
     "/api/tips/auto-create-async",
     {
-      headers: authHeader(),
       data: payload,
     }
   );
