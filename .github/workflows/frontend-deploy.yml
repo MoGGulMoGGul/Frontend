@@ -1,4 +1,4 @@
-name: MogulMoggul Frontend CI/CD
+name: MogulMogul Frontend CI/CD
 
 on:
   push:
@@ -20,7 +20,6 @@ jobs:
 
       - name: Create .env.local file
         run: |
-          # GitHub Secrets를 사용해 .env.local 파일을 생성합니다.
           echo "NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" > .env.local
 
       - name: Install Dependencies
@@ -29,13 +28,22 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      - name: Deploy to S3
+      # AWS 자격 증명을 한 번만 설정
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
       
+      # S3에 빌드된 파일을 업로드
       - name: Upload to S3
         run: |
           aws s3 sync ./out s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
+
+      # S3 배포가 완료된 후, 맨 마지막에 캐시를 무효화
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
