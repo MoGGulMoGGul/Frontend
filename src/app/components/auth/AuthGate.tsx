@@ -24,13 +24,6 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   //하이드레이션이 끝난후, 보호 경로인데 액세스/리프레시 둘 다 없으면 즉시 로그인으로
   useEffect(() => {
-    if (!hasHydrated) return;
-    console.log("[AuthGate]", {
-      hasHydrated,
-      accessToken,
-      refreshToken,
-      pathname,
-    });
     if (isPublic) return;
 
     if (!accessToken && !refreshToken) {
