@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 
 import NotificationProvider from "@/app/components/layout/NotificationContext";
 import AuthGate from "@/app/components/auth/AuthGate";
 import AppFrame from "@/app/components/layout/AppFrame";
 import AlarmConsole from "./components/realtime/AlarmConsole";
-import AuthBootstrap from "./components/auth/AuthBootstrap";
+import AuthBootstrap from "@/app/components/auth/AuthBootstrap";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -18,8 +19,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "모꿀모꿀",
   description: "모꿀모꿀 — 꿀팁 아카이브",
-  // 필요하면 파비콘도 여기서 명시:
-  // icons: { icon: [{ url: "/favicon.ico", sizes: "any" }] },
 };
 
 export default function RootLayout({
@@ -33,10 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        {/* 방어 코드: 확장 프로그램이 body에 주입하는 속성 제거 */}
         <Script id="remove-ext-attrs" strategy="beforeInteractive">
           {`
-            const targetAttrs = ['cz-shortcut-listen']; // ColorZilla 등
+            const targetAttrs = ['cz-shortcut-listen'];
             function cleanAttrs() {
               if (!document?.body) return;
               targetAttrs.forEach(attr => {
@@ -52,13 +50,21 @@ export default function RootLayout({
         </Script>
 
         <NotificationProvider>
-          <AuthBootstrap />
-          <AuthGate>
-            <AppFrame>
-              <AlarmConsole />
-              {children}
-            </AppFrame>
-          </AuthGate>
+          <Suspense
+            fallback={
+              <div className="w-full h-[60vh] grid place-items-center text-gray-500">
+                로딩 중...
+              </div>
+            }
+          >
+            <AuthBootstrap />
+            <AuthGate>
+              <AppFrame>
+                <AlarmConsole />
+                {children}
+              </AppFrame>
+            </AuthGate>
+          </Suspense>
         </NotificationProvider>
       </body>
     </html>
