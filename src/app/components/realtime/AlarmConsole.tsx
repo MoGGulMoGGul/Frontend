@@ -6,15 +6,11 @@ export default function AlarmConsole() {
   const { connected } = useRealtime([
     {
       destination: `${USER_PREFIX}/queue/notifications`,
-      onMessage: (m) => {
-        console.log("[FOLLOWING_TIP_CREATED or 개인 알림]", m);
-      },
+      onMessage: (m) => console.log("[PERSONAL]", m),
     },
     {
       destination: `${TOPIC_PREFIX}/notifications`,
-      onMessage: (m) => {
-        console.log("[GROUP_TIP_CREATED or 공용 알림]", m);
-      },
+      onMessage: (m) => console.log("[BROADCAST]", m),
     },
   ]);
 
