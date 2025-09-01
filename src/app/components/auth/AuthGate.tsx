@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const PUBLIC_PATHS = ["/login", "/signup"];
@@ -9,72 +9,104 @@ const PUBLIC_PATHS = ["/login", "/signup"];
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const accessToken = useAuthStore((s) => s.accessToken);
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
 
+  // 현재 경로가 공개 경로인지
   const isPublic = useMemo(() => {
     if (!pathname) return true;
     return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p));
   }, [pathname]);
 
-  const [ready, setReady] = useState(isPublic);
+  const [ready, setReady] = useState<boolean>(isPublic);
   const triedRefresh = useRef(false);
+  const unmounted = useRef(false);
 
-  //하이드레이션이 끝난후, 보호 경로인데 액세스/리프레시 둘 다 없으면 즉시 로그인으로
+  // 언마운트 플래그
   useEffect(() => {
-    if (isPublic) return;
+    unmounted.current = false;
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
 
-    if (!accessToken && !refreshToken) {
-      const search =
-        typeof window !== "undefined" ? window.location.search : "";
-      const next = `${pathname ?? ""}${search ?? ""}`;
-      router.replace(`/login?next=${encodeURIComponent(next)}`);
-      return; // 여기서 끝
-    }
-  }, [hasHydrated, isPublic, accessToken, refreshToken, pathname, router]);
+  // 경로가 바뀌면 public 여부에 따라 ready 초기화
+  useEffect(() => {
+    setReady(isPublic);
+  }, [isPublic]);
 
+  // 하이드레이션 완료 전엔 아무것도 안 함 (중요!)
   useEffect(() => {
     if (!hasHydrated) return;
 
-    // 공개 경로는 바로 렌더
+    // 공개 경로는 즉시 렌더
     if (isPublic) {
       setReady(true);
       return;
     }
 
-    // 액세스 토큰 있으면 렌더
+    // 보호 경로
+    // 1) access 있으면 통과
     if (accessToken) {
       setReady(true);
       return;
     }
 
-    // 여기부터 보호 경로 + 액세스 없음 (리프레시 있으면 한 번 시도)
-    const doWork = async () => {
-      if (refreshToken && !triedRefresh.current) {
-        triedRefresh.current = true;
-        try {
-          await useAuthStore.getState().refreshTokens();
-        } catch {
-          // 실패해도 아래에서 처리
+    // 2) access 없고 refresh 없으면 로그인으로
+    if (!refreshToken) {
+      const next = buildNext(pathname, searchParams);
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
+      return;
+    }
+
+    // 3) access 없고 refresh 있으면 1회 리프레시 시도
+    const work = async () => {
+      if (triedRefresh.current) {
+        // 이미 시도했는데도 토큰 없으면 로그인
+        const tokenNow = useAuthStore.getState().accessToken;
+        if (!tokenNow) {
+          const next = buildNext(pathname, searchParams);
+          router.replace(`/login?next=${encodeURIComponent(next)}`);
+          return;
         }
+        // 토큰 생겼다면 통과
+        if (!unmounted.current) setReady(true);
+        return;
       }
 
-      const tokenNow = useAuthStore.getState().accessToken;
-      if (!tokenNow) {
-        const search =
-          typeof window !== "undefined" ? window.location.search : "";
-        const next = `${pathname ?? ""}${search ?? ""}`;
+      triedRefresh.current = true;
+      try {
+        await useAuthStore.getState().refreshTokens();
+      } catch {
+        // 실패 → 로그인
+        const next = buildNext(pathname, searchParams);
         router.replace(`/login?next=${encodeURIComponent(next)}`);
         return;
       }
 
-      setReady(true);
+      // 성공 시 토큰 확인 후 통과
+      const tokenNow = useAuthStore.getState().accessToken;
+      if (!tokenNow) {
+        const next = buildNext(pathname, searchParams);
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
+        return;
+      }
+      if (!unmounted.current) setReady(true);
     };
 
-    void doWork();
-  }, [accessToken, isPublic, pathname, router, hasHydrated, refreshToken]);
+    void work();
+  }, [
+    hasHydrated,
+    isPublic,
+    accessToken,
+    refreshToken,
+    pathname,
+    searchParams,
+    router,
+  ]);
 
   if (!ready && !isPublic) {
     return (
@@ -85,4 +117,12 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>;
+}
+
+function buildNext(
+  pathname: string | null,
+  searchParams: ReturnType<typeof useSearchParams>
+) {
+  const search = searchParams?.toString();
+  return `${pathname ?? ""}${search ? `?${search}` : ""}`;
 }

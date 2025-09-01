@@ -47,6 +47,9 @@ type AuthState = {
   // 하이드레이션 플래그
   _hasHydrated: boolean;
   _setHasHydrated: (v: boolean) => void;
+
+  authReady: boolean; // 재발급 시도 완료 신호
+  setAuthReady: (v: boolean) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -160,6 +163,10 @@ export const useAuthStore = create<AuthState>()(
       // 하이드레이션 플래그 기본값/세터
       _hasHydrated: false,
       _setHasHydrated: (v) => set({ _hasHydrated: v }),
+
+      // 재발급 시도 완료 신호 (메모리 전용)
+      authReady: false,
+      setAuthReady: (v) => set({ authReady: v }),
     }),
     {
       name: "local-storage",

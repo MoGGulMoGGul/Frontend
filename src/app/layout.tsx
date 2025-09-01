@@ -6,6 +6,8 @@ import "./globals.css";
 import NotificationProvider from "@/app/components/layout/NotificationContext";
 import AuthGate from "@/app/components/auth/AuthGate";
 import AppFrame from "@/app/components/layout/AppFrame";
+import AlarmConsole from "./components/realtime/AlarmConsole";
+import AuthBootstrap from "./components/auth/AuthBootstrap";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -50,8 +52,12 @@ export default function RootLayout({
         </Script>
 
         <NotificationProvider>
+          <AuthBootstrap />
           <AuthGate>
-            <AppFrame>{children}</AppFrame>
+            <AppFrame>
+              <AlarmConsole />
+              {children}
+            </AppFrame>
           </AuthGate>
         </NotificationProvider>
       </body>
