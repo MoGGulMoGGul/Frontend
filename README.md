@@ -1,4 +1,4 @@
-# 모꿀모꿀 (MoggulMogul) - Frontend
+# 모꿀모꿀 (MoGGulMoGGul) - Frontend
 ![header](https://capsule-render.vercel.app/api?type=cylinder&color=EAC149&height=130&section=header&text=MOGGUL-MOGGUL%20Frontend&fontSize=50&animation=scaleIn&fontColor=FFF)
 
 <p align="center">
