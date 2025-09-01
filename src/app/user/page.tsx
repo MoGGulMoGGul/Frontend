@@ -78,6 +78,12 @@ export default function UserFeedPage() {
       setActionErr("로그인이 필요합니다.");
       return;
     }
+    // 자기 자신 팔로우 방지
+    if (profile.userNo === myUserNo) {
+      setActionErr("본인은 팔로우할 수 없어요.");
+      return;
+    }
+    const followeeId = profile.loginId;
 
     setProcessing(true);
     setActionErr(null);
@@ -102,9 +108,9 @@ export default function UserFeedPage() {
 
     try {
       if (currentIsFollow) {
-        await unfollowUser(profile.loginId);
+        await unfollowUser(followeeId);
       } else {
-        await followUser(profile.loginId);
+        await followUser(followeeId);
       }
       const freshMe = await getUserProfile(myUserNo);
       setCountsFromProfile(freshMe);
@@ -129,6 +135,12 @@ export default function UserFeedPage() {
       setProcessing(false);
     }
   };
+
+  // 버튼 가드 및 boolean 정규화 (렌더 전에 계산)
+  const canFollow =
+    !!profile?.loginId &&
+    typeof myUserNo === "number" &&
+    profile?.userNo !== myUserNo;
 
   if (invalidParam) {
     return <main className="p-6">잘못된 경로입니다.</main>;
@@ -226,16 +238,26 @@ export default function UserFeedPage() {
               {/* 팔로우/언팔 토글 */}
               <button
                 onClick={handleToggleFollow}
-                disabled={processing}
+                disabled={processing || !canFollow}
                 className={[
                   "w-24 h-12 rounded-xl border hover:cursor-pointer disabled:opacity-60",
                   profile.isFollowing
                     ? "bg-[var(--color-honey-pale)] border-[var(--color-honey-pale)]"
                     : "bg-white border-[var(--color-honey-pale)] hover:bg-[var(--color-honey-pale)]",
                 ].join(" ")}
-                aria-pressed={profile.isFollowing ?? undefined}
+                aria-pressed={!!profile.isFollowing}
                 aria-label={profile.isFollowing ? "언팔로우" : "팔로우"}
-                title={profile.isFollowing ? "언팔로우" : "팔로우"}
+                title={
+                  canFollow
+                    ? profile.isFollowing
+                      ? "언팔로우"
+                      : "팔로우"
+                    : typeof myUserNo !== "number"
+                    ? "로그인이 필요합니다."
+                    : profile?.userNo === myUserNo
+                    ? "본인은 팔로우할 수 없어요."
+                    : "아이디 정보가 없어 팔로우할 수 없어요."
+                }
               >
                 {processing
                   ? "처리 중..."
@@ -283,7 +305,14 @@ export default function UserFeedPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <FollowerListModal
             targetUserNo={id}
-            onClose={() => setOpenFollowers(false)}
+            onClose={async () => {
+              /* [MOD] 닫힐 때 프로필 동기화 */
+              setOpenFollowers(false);
+              try {
+                const fresh = await getUserProfile(id);
+                setProfile(fresh);
+              } catch {}
+            }}
           />
         </div>
       )}
@@ -291,7 +320,14 @@ export default function UserFeedPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <FollowingListModal
             targetUserNo={id}
-            onClose={() => setOpenFollowings(false)}
+            onClose={async () => {
+              /* 닫힐 때 프로필 동기화 */
+              setOpenFollowings(false);
+              try {
+                const fresh = await getUserProfile(id);
+                setProfile(fresh);
+              } catch {}
+            }}
           />
         </div>
       )}

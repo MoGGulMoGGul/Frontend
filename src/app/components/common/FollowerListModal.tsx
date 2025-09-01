@@ -47,9 +47,9 @@ export default function FollowerListModal({
     (async () => {
       try {
         setLoading(true);
-        const data = await getFollowers(targetUserNo); // ✅ targetUserNo 사용
+        const data = await getFollowers(targetUserNo);
         if (!alive) return;
-        setFollowers(data);
+        setFollowers(data.map((u) => ({ ...u, isFollowing: !!u.isFollowing })));
         setErrMsg(null);
       } catch (err: unknown) {
         if (alive) setErrMsg(extractApiErrorMessage(err));
@@ -91,7 +91,7 @@ export default function FollowerListModal({
     setFollowers((prev) =>
       prev.map((u) =>
         u.userNo === targetUserNoForUi
-          ? { ...u, isFollow: !currentIsFollow }
+          ? { ...u, isFollowing: !currentIsFollow }
           : u
       )
     );
@@ -116,7 +116,7 @@ export default function FollowerListModal({
       setFollowers((prev) =>
         prev.map((u) =>
           u.userNo === targetUserNoForUi
-            ? { ...u, isFollow: currentIsFollow }
+            ? { ...u, isFollowing: currentIsFollow }
             : u
         )
       );
@@ -149,9 +149,14 @@ export default function FollowerListModal({
         {!loading && !errMsg && followers.length > 0 && (
           <ul>
             {followers.map((f) => {
-              // loginId가 없다면 userNo 문자열을 대체키로 사용
               const busyKey = f.loginId ?? String(f.userNo);
               const isBusy = processing.has(busyKey);
+
+              const canFollow =
+                !!(f.loginId && f.loginId.trim().length > 0) &&
+                typeof userNo === "number" &&
+                f.userNo !== userNo;
+
               return (
                 <li
                   key={f.userNo}
@@ -175,24 +180,35 @@ export default function FollowerListModal({
 
                   <button
                     onClick={() =>
-                      handleToggleFollow(
-                        f.loginId ?? String(f.userNo), // ✅ any 제거
-                        f.userNo,
-                        f.isFollow
-                      )
+                      canFollow &&
+                      handleToggleFollow(f.loginId!, f.userNo, f.isFollowing)
                     }
-                    disabled={isBusy}
+                    disabled={isBusy || !canFollow}
                     className={[
                       "w-[94px] h-[49px] rounded-xl border hover:cursor-pointer disabled:opacity-60",
-                      f.isFollow
+                      f.isFollowing
                         ? "bg-[var(--color-honey-pale)] border-[var(--color-honey-pale)]"
                         : "bg-white border-[var(--color-honey-pale)] hover:bg-[var(--color-honey-pale)]",
                     ].join(" ")}
-                    aria-pressed={f.isFollow}
-                    aria-label={f.isFollow ? "언팔로우" : "팔로우"}
-                    title={f.isFollow ? "언팔로우" : "팔로우"}
+                    aria-pressed={!!f.isFollowing}
+                    aria-label={f.isFollowing ? "언팔로우" : "팔로우"}
+                    title={
+                      canFollow
+                        ? f.isFollowing
+                          ? "언팔로우"
+                          : "팔로우"
+                        : typeof userNo !== "number"
+                        ? "로그인이 필요합니다."
+                        : f.userNo === userNo
+                        ? "본인은 팔로우할 수 없어요."
+                        : "아이디 정보가 없어 팔로우할 수 없어요"
+                    }
                   >
-                    {isBusy ? "처리 중..." : f.isFollow ? "팔로잉" : "팔로우"}
+                    {isBusy
+                      ? "처리 중..."
+                      : f.isFollowing
+                      ? "팔로잉"
+                      : "팔로우"}
                   </button>
                 </li>
               );

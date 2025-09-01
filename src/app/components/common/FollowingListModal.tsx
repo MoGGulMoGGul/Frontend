@@ -48,10 +48,12 @@ export default function FollowingListModal({
     (async () => {
       try {
         setLoading(true);
-        // ✅ 전달받은 targetUserNo의 팔로잉 목록 조회
+        // 전달받은 targetUserNo의 팔로잉 목록 조회
         const data = await getFollowings(targetUserNo);
         if (!alive) return;
-        setFollowings(data);
+        setFollowings(
+          data.map((u) => ({ ...u, isFollowing: !!u.isFollowing }))
+        ); // [MOD] 초기 정규화(안전)
         setErrMsg(null);
       } catch (err: unknown) {
         if (alive) setErrMsg(extractApiErrorMessage(err));
@@ -92,7 +94,7 @@ export default function FollowingListModal({
     setFollowings((prev) =>
       prev.map((u) =>
         u.userNo === targetUserNoForUi
-          ? { ...u, isFollow: !currentIsFollow }
+          ? { ...u, isFollowing: !currentIsFollow }
           : u
       )
     );
@@ -117,7 +119,7 @@ export default function FollowingListModal({
       setFollowings((prev) =>
         prev.map((u) =>
           u.userNo === targetUserNoForUi
-            ? { ...u, isFollow: currentIsFollow }
+            ? { ...u, isFollowing: currentIsFollow }
             : u
         )
       );
@@ -150,10 +152,9 @@ export default function FollowingListModal({
         {!loading && !errMsg && followings.length > 0 && (
           <ul>
             {followings.map((f) => {
-              // busy 키: loginId가 있으면 loginId, 없으면 userNo 문자열
               const busyKey = f.loginId ?? String(f.userNo);
               const isBusy = processing.has(busyKey);
-              const canFollow = !!f.loginId; // loginId 없으면 버튼 비활성화
+              const canFollow = !!(f.loginId && f.loginId.trim().length > 0);
 
               return (
                 <li
@@ -179,26 +180,30 @@ export default function FollowingListModal({
                   <button
                     onClick={() =>
                       canFollow &&
-                      handleToggleFollow(f.loginId!, f.userNo, f.isFollow)
+                      handleToggleFollow(f.loginId!, f.userNo, f.isFollowing)
                     }
                     disabled={isBusy || !canFollow}
+                    className={[
+                      "w-[94px] h-[49px] rounded-xl border hover:cursor-pointer disabled:opacity-60",
+                      f.isFollowing
+                        ? "bg-[var(--color-honey-pale)] border-[var(--color-honey-pale)]"
+                        : "bg-white border-[var(--color-honey-pale)] hover:bg-[var(--color-honey-pale)]",
+                    ].join(" ")}
+                    aria-pressed={!!f.isFollowing}
+                    aria-label={f.isFollowing ? "언팔로우" : "팔로우"}
                     title={
                       canFollow
-                        ? f.isFollow
+                        ? f.isFollowing
                           ? "언팔로우"
                           : "팔로우"
                         : "아이디 정보가 없어 팔로우할 수 없어요"
                     }
-                    className={[
-                      "w-[94px] h-[49px] rounded-xl border hover:cursor-pointer disabled:opacity-60",
-                      f.isFollow
-                        ? "bg-[var(--color-honey-pale)] border-[var(--color-honey-pale)]"
-                        : "bg-white border-[var(--color-honey-pale)] hover:bg-[var(--color-honey-pale)]",
-                    ].join(" ")}
-                    aria-pressed={f.isFollow}
-                    aria-label={f.isFollow ? "언팔로우" : "팔로우"}
                   >
-                    {isBusy ? "처리 중..." : f.isFollow ? "팔로잉" : "팔로우"}
+                    {isBusy
+                      ? "처리 중..."
+                      : f.isFollowing
+                      ? "팔로잉"
+                      : "팔로우"}
                   </button>
                 </li>
               );

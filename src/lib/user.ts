@@ -27,7 +27,7 @@ export type FollowUserItem = {
   userNo: number;
   nickname: string;
   profileImageUrl: string;
-  isFollow: boolean;
+  isFollowing: boolean;
   loginId: string;
 };
 
