@@ -48,7 +48,7 @@ export default function HexCard({
 
   useEffect(() => {
     const colorSets: ColorSet[] = [
-      { bg: "rgba(249,217,118,1)", border: "rgba(232,155,22,1)" },
+      { bg: "rgba(249,217,118,0.9)", border: "rgba(232,155,22,1)" },
       { bg: "rgba(249,217,118,0.65)", border: "rgba(249,217,118,1)" },
       { bg: "rgba(255,243,176,0.7)", border: "rgba(255,239,150,1)" },
     ];

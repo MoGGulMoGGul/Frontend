@@ -98,6 +98,17 @@ input[type="radio"]:checked::before {
 @layer utilities {
   .hex {
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    -webkit-clip-path: polygon(
+      25% 0%,
+      75% 0%,
+      100% 50%,
+      75% 100%,
+      25% 100%,
+      0% 50%
+    );
+    will-change: clip-path, background-color;
+    contain: paint;
+    backface-visibility: hidden;
   }
   .hex-ar {
     aspect-ratio: 1.15 / 1;

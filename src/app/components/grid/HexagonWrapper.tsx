@@ -14,10 +14,12 @@ export default function HexagonWrapper({
 }) {
   return (
     <div
-      className={clsx("hex hex-ar hex-center w-full", className)}
+      className={clsx("hex hex-ar hex-center w-full transform-gpu", className)}
       style={{
         backgroundColor: bg,
         ...(rotate ? { transform: `rotate(${rotate})` } : {}),
+        willChange: "clip-path, background-color",
+        backfaceVisibility: "hidden",
       }}
     >
       {children}
