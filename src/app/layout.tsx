@@ -7,7 +7,6 @@ import { Suspense } from "react";
 import NotificationProvider from "@/app/components/layout/NotificationContext";
 import AuthGate from "@/app/components/auth/AuthGate";
 import AppFrame from "@/app/components/layout/AppFrame";
-import AlarmConsole from "./components/realtime/AlarmConsole";
 import AuthBootstrap from "@/app/components/auth/AuthBootstrap";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -59,10 +58,7 @@ export default function RootLayout({
           >
             <AuthBootstrap />
             <AuthGate>
-              <AppFrame>
-                <AlarmConsole />
-                {children}
-              </AppFrame>
+              <AppFrame>{children}</AppFrame>
             </AuthGate>
           </Suspense>
         </NotificationProvider>

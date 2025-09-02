@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CommonModal from "@/app/components/modal/CommonModal";
 import ModalDetailContent from "@/app/components/modal/ModalDetailContent";
 import SearchBar from "@/app/components/common/SearchBar";
 import HexGridWithData from "@/app/components/grid/HexGridWithData";
 import { MYTIP_IMAGE_SLOTS } from "@/app/components/grid/TipImageSlots";
+import FloatingBtn from "@/app/components/FloatingBtn";
 
 import {
   getStoragesByGroup,
@@ -19,14 +20,18 @@ import {
 export default function GrouptipStoragePage() {
   const router = useRouter();
 
-  const { groupNo, storageNo } = useMemo(() => {
-    if (typeof window === "undefined") return { groupNo: NaN, storageNo: NaN };
-    const sp = new URLSearchParams(window.location.search);
-    return {
-      groupNo: Number(sp.get("groupNo") ?? NaN),
-      storageNo: Number(sp.get("storageNo") ?? NaN),
-    };
-  }, []);
+  const sp = useSearchParams();
+  const groupNo = useMemo(() => {
+    const v = sp.get("groupNo");
+    const n = v == null ? NaN : Number(v);
+    return Number.isFinite(n) ? n : NaN;
+  }, [sp]);
+
+  const storageNo = useMemo(() => {
+    const v = sp.get("storageNo");
+    const n = v == null ? NaN : Number(v);
+    return Number.isFinite(n) ? n : NaN;
+  }, [sp]);
 
   const [name, setName] = useState("");
   const [loadingHeader, setLoadingHeader] = useState(true);
@@ -290,10 +295,9 @@ export default function GrouptipStoragePage() {
           />
         )}
 
-        {/* 얇은 모달 레이어: 여기서만 useSearchParams 사용 */}
-        <Suspense fallback={null}>
-          <ModalLayer />
-        </Suspense>
+        <FloatingBtn />
+
+        <ModalLayer />
       </div>
     </>
   );

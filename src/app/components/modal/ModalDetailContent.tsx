@@ -55,7 +55,7 @@ export default function ModalDetailContent({ id, onClose }: Props) {
     (data.nickname === (login ?? "") || data.nickname === (myNickname ?? ""));
 
   const handleEdit = () => {
-    router.push(`/edittip/${id}`);
+    router.push(`/edittip?id=${id}`);
   };
 
   const handleDelete = async () => {

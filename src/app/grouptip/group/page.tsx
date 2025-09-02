@@ -187,7 +187,9 @@ export default function GrouptipGroupPage() {
       setIsModalOpen(false);
       setForm({ name: "" });
       router.push(
-        `/grouptip/storage?groupNo=${groupNo!}&storageNo=${res.storageNo}`
+        `/grouptip/storage?groupNo=${groupNo!}&storageNo=${
+          res.storageNo
+        }&storageName=${encodeURIComponent(name)}`
       );
     } catch (e) {
       console.error(e);
@@ -304,9 +306,9 @@ export default function GrouptipGroupPage() {
                   {storages.map((s) => (
                     <Link
                       key={s.storageNo}
-                      href={`/grouptip/storage?groupNo=${groupNo!}&storageNo=${
+                      href={`/grouptip/storage?groupNo=${groupNo}&storageNo=${
                         s.storageNo
-                      }`}
+                      }&storageName=${encodeURIComponent(s.name)}`}
                       className="flex flex-col items-center hover:cursor-pointer"
                     >
                       <div className="relative mb-3">

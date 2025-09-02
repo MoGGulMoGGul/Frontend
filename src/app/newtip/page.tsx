@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createTipDraft, registerTip, type TipDraftResponse } from "@/lib/tips";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -10,20 +11,46 @@ import BoldLabeledField from "../components/form/BoldLabeledInput";
 import CommonModal from "../components/modal/CommonModal";
 import OkBtn from "../components/common/OkBtn";
 import SearchBar from "../components/common/SearchBar";
-import { useRouter } from "next/navigation";
 import { resolveLocalThumb } from "@/lib/resolveLocalThumb";
+
+// 그룹 보관함 API/타입
+import { getStoragesByGroup, type GroupStorageItem } from "@/lib/storage";
 
 export default function NewtipPage() {
   const router = useRouter();
   const onClose = () => router.back();
 
+  const sp = useSearchParams();
+
+  // storageNo, groupNo
+  const storageNoFromQuery = useMemo(() => {
+    const v = sp.get("storageNo");
+    const n = v == null ? NaN : Number(v);
+    return Number.isFinite(n) ? n : null;
+  }, [sp]);
+
+  const groupNoFromQuery = useMemo(() => {
+    const v = sp.get("groupNo");
+    const n = v == null ? NaN : Number(v);
+    return Number.isFinite(n) ? n : null;
+  }, [sp]);
+
+  const storageNameFromQuery = sp.get("storageName");
+
   const userNo =
     useAuthStore((s) => (s as unknown as { userNo?: number }).userNo) ?? 1;
 
+  // 개인 보관함(전역)
   useEnsureUserStoragesLoaded(userNo);
-  const storages = useUserStorageStore((s) => s.storages);
+  const personalStorages = useUserStorageStore((s) => s.storages);
 
-  // --- 입력 상태 (초기엔 3개만 사용) ---
+  // 그룹 보관함(로컬)
+  const [groupStorages, setGroupStorages] = useState<GroupStorageItem[] | null>(
+    null
+  );
+  const [groupStoragesLoading, setGroupStoragesLoading] = useState(false);
+
+  // --- 입력 상태 ---
   const [url, setUrl] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [tagsInput, setTagsInput] = useState<string>("");
@@ -32,8 +59,43 @@ export default function NewtipPage() {
   const [isPublic, setIsPublic] = useState<boolean>(true);
   const [storageNo, setStorageNo] = useState<number | "">("");
 
+  // storageNo가 오면 저장 대상 고정
+  useEffect(() => {
+    if (storageNoFromQuery != null) {
+      setStorageNo(storageNoFromQuery);
+    }
+  }, [storageNoFromQuery]);
+
+  const isStorageFixed = storageNoFromQuery != null;
+
+  // storageNo가 없고 groupNo가 있으면 그룹 보관함 목록 로딩
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (isStorageFixed) return;
+      if (groupNoFromQuery == null) return;
+
+      try {
+        setGroupStoragesLoading(true);
+        const list = await getStoragesByGroup(groupNoFromQuery);
+        if (!alive) return;
+        setGroupStorages(list);
+      } catch (err: unknown) {
+        console.error("그룹 보관함 목록 로딩 실패:", err);
+        if (!alive) return;
+        setGroupStorages([]);
+      } finally {
+        if (!alive) return;
+        setGroupStoragesLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [groupNoFromQuery, isStorageFixed]);
+
   // --- 응답/진행 상태 ---
-  const [hasDraft, setHasDraft] = useState<boolean>(false); // ← draftId 대신 단계 전환 플래그
+  const [hasDraft, setHasDraft] = useState<boolean>(false);
   const [summary, setSummary] = useState<string>("");
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
@@ -63,7 +125,6 @@ export default function NewtipPage() {
       e.dataTransfer.getData("text/plain");
     if (droppedText) {
       setUrl(droppedText.trim());
-      // 새 URL이면 이전 초안 상태 초기화
       setHasDraft(false);
       setSummary("");
       setThumbnailUrl(null);
@@ -86,10 +147,10 @@ export default function NewtipPage() {
   const validUrl = useMemo(() => /^https?:\/\/\S+$/i.test(url), [url]);
 
   // 단계 플래그
-  const canSummarize = validUrl && !summarizing; // 1단계 버튼
-  const canSave = hasDraft && !saving && storageNo !== ""; // 2단계 버튼
+  const canSummarize = validUrl && !summarizing;
+  const canSave = hasDraft && !saving && storageNo !== "";
 
-  // 1단계: 요약 생성(/api/tips/generate)
+  // 1단계: 요약 생성
   const handleSummarize = async () => {
     if (!validUrl) {
       openInfo("올바른 URL을 입력하거나 드래그해 주세요.");
@@ -107,8 +168,7 @@ export default function NewtipPage() {
         tags: tags.length ? tags : undefined,
       });
 
-      // 초안 응답 세팅
-      setSummary(res.summary ?? ""); // ← 초안 요약을 바로 표시
+      setSummary(res.summary ?? "");
       if (!title && res.title) setTitle(res.title);
       if (!tagsInput && Array.isArray(res.tags) && res.tags.length > 0) {
         setTagsInput(res.tags.join(", "));
@@ -116,17 +176,16 @@ export default function NewtipPage() {
       const thumb = res.thumbnailImageUrl ?? null;
       if (thumb) setThumbnailUrl(thumb);
 
-      // 등록 단계 UI 오픈
       setHasDraft(true);
-    } catch (e) {
-      console.error("요약 생성 실패:", e);
+    } catch (err: unknown) {
+      console.error("요약 생성 실패:", err);
       openInfo("요약 생성에 실패했습니다.");
     } finally {
       setSummarizing(false);
     }
   };
 
-  // 2단계: 등록(/api/tips/register) — 명세 7개 필드만 전송
+  // 2단계: 저장
   const handleSave = async () => {
     if (!canSave || typeof storageNo !== "number") return;
 
@@ -145,12 +204,12 @@ export default function NewtipPage() {
         summary: finalSummary,
         thumbnailImageUrl: thumbnailUrl || "",
         tags,
-        storageNo,
+        storageNo, // 고정 storageNo 또는 드롭다운 선택값
         isPublic,
       });
       openInfo("꿀팁이 저장되었습니다!", onClose);
-    } catch (e) {
-      console.error("꿀팁 저장 실패:", e);
+    } catch (err: unknown) {
+      console.error("꿀팁 저장 실패:", err);
       openInfo("꿀팁 저장에 실패했습니다.");
     } finally {
       setSaving(false);
@@ -164,6 +223,70 @@ export default function NewtipPage() {
     "w-full max-w-[520px] h-11 px-3 rounded-md bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-300";
   const selectBase =
     "w-full h-10 rounded-md px-3 bg-[#f5f5f5] border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-300";
+
+  // 드롭다운 렌더링 분기
+  // storageNo 고정 → 안내만
+  // storageNo 미고정 & groupNo 있음 → 그룹 보관함 드롭다운
+  // 둘 다 없음 → 개인 보관함 드롭다운
+  const renderStorageSelect = () => {
+    if (isStorageFixed) {
+      return (
+        <div className="text-sm text-gray-700">
+          이 꿀팁은{" "}
+          <b>{storageNameFromQuery ?? `보관함 #${storageNoFromQuery}`}</b> 에
+          저장됩니다.
+        </div>
+      );
+    }
+    if (groupNoFromQuery != null) {
+      if (groupStoragesLoading) {
+        return (
+          <div className="text-sm text-gray-500">
+            그룹 보관함 불러오는 중...
+          </div>
+        );
+      }
+      if ((groupStorages?.length ?? 0) === 0) {
+        return (
+          <div className="text-sm text-gray-500">
+            이 그룹에는 보관함이 없습니다.
+          </div>
+        );
+      }
+      return (
+        <select
+          value={storageNo}
+          onChange={(e) =>
+            setStorageNo(e.target.value ? Number(e.target.value) : "")
+          }
+          className={selectBase}
+        >
+          <option value="">그룹 보관함을 선택하세요</option>
+          {groupStorages!.map((s) => (
+            <option key={s.storageNo} value={s.storageNo}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    return (
+      <select
+        value={storageNo}
+        onChange={(e) =>
+          setStorageNo(e.target.value ? Number(e.target.value) : "")
+        }
+        className={selectBase}
+      >
+        <option value="">보관함을 선택하세요</option>
+        {personalStorages.map((s) => (
+          <option key={s.storageNo} value={s.storageNo}>
+            {s.name}
+          </option>
+        ))}
+      </select>
+    );
+  };
 
   return (
     <>
@@ -194,7 +317,7 @@ export default function NewtipPage() {
       <div className="relative p-6 pt-0">
         <div className="flex flex-col">
           <div className="flex items-stretch gap-11 mb-20">
-            {/* 왼쪽: URL/드롭 영역 (1단계부터 표시) */}
+            {/* 왼쪽: URL/드롭 영역 */}
             <div
               onDrop={onDrop}
               onDragOver={onDragOver}
@@ -226,7 +349,6 @@ export default function NewtipPage() {
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
-                  // URL 바뀌면 2단계 정보 리셋
                   if (thumbnailUrl) setThumbnailUrl(null);
                   if (hasDraft) setHasDraft(false);
                   if (summary) setSummary("");
@@ -244,7 +366,7 @@ export default function NewtipPage() {
 
             {/* 오른쪽: 입력 패널 */}
             <div className="w-1/2">
-              {/* 1단계: 제목/태그만 노출 */}
+              {/* 1단계: 제목/태그 */}
               <BoldLabeledField
                 label="제목"
                 value={title}
@@ -259,7 +381,7 @@ export default function NewtipPage() {
                 onChange={(e) => setTagsInput(e.target.value)}
               />
 
-              {/* 2단계부터 요약/공개/보관함 노출 */}
+              {/* 2단계부터 요약/공개/보관함 */}
               {hasDraft && (
                 <>
                   <BoldLabeledField
@@ -294,29 +416,14 @@ export default function NewtipPage() {
 
                   <div className="mt-6">
                     <div className="font-semibold mb-2">저장할 보관함</div>
-                    <select
-                      value={storageNo}
-                      onChange={(e) =>
-                        setStorageNo(
-                          e.target.value ? Number(e.target.value) : ""
-                        )
-                      }
-                      className={selectBase}
-                    >
-                      <option value="">보관함을 선택하세요</option>
-                      {storages.map((s) => (
-                        <option key={s.storageNo} value={s.storageNo}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
+                    {renderStorageSelect()}
                   </div>
                 </>
               )}
             </div>
           </div>
 
-          {/* 하단 액션: 1단계(요약하기) → 2단계(저장하기) */}
+          {/* 하단 액션 */}
           <div className="flex items-center gap-2 ml-auto">
             <button
               onClick={handleSummarize}
