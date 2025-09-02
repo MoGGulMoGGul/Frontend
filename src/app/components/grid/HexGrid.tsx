@@ -93,8 +93,8 @@ export default function HexGrid() {
       {columns.map((col, colIdx) => (
         <div
           key={colIdx}
-          className={`flex flex-col items-center gap-3 ${
-            colIdx % 2 !== 1 ? "mt-[107px]" : ""
+          className={`flex flex-col items-center gap-3 xl:gap-4 2xl:gap-5 ${
+            colIdx % 2 !== 1 ? "mt-[96px] xl:mt-[107px] 2xl:mt-[118px]" : ""
           }`}
           style={{ width: `${100 / COLS}%` }}
         >
@@ -107,7 +107,7 @@ export default function HexGrid() {
               return (
                 <div
                   key={`img-${slot.idx}`}
-                  className="relative w-full hex-ar pointer-events-none"
+                  className="relative w-full min-w-0 hex-ar pointer-events-none"
                 >
                   {showImg ? (
                     <HexImage
@@ -132,7 +132,10 @@ export default function HexGrid() {
             if (tip) {
               // 데이터 있음: 색 있는 카드(클릭/호버 가능)
               return (
-                <div key={`tip-${slot.idx}`} className="relative w-full hex-ar">
+                <div
+                  key={`tip-${slot.idx}`}
+                  className="relative w-full min-w-0 hex-ar"
+                >
                   <HexCard
                     id={tip.no}
                     label={tip.title || "(제목 없음)"}
@@ -144,7 +147,10 @@ export default function HexGrid() {
 
             // 데이터 없음: 회색(비활성)
             return (
-              <div key={`empty-${slot.idx}`} className="relative w-full hex-ar">
+              <div
+                key={`empty-${slot.idx}`}
+                className="relative w-full min-w-0 hex-ar"
+              >
                 <HexagonWrapper className="pointer-events-none" bg={EMPTY_BG} />
               </div>
             );

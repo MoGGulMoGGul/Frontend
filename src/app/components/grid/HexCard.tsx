@@ -114,7 +114,11 @@ export default function HexCard({
       </HexagonWrapper>
 
       {/* 캡션: 항상 표시 */}
-      <div className="text-center text-sm mt-1 truncate w-full">{label}</div>
+      <div className="w-full min-w-0 px-1">
+        <div className="truncate text-center mt-1 mx-auto text-[clamp(12px,0.9vw,14px)] max-w-[92%] xl:max-w-[86%] 2xl:max-w-[80%]">
+          {label}
+        </div>
+      </div>
 
       {/* hover 오버레이 (저장 버튼) */}
       <HexagonWrapper
@@ -158,7 +162,6 @@ export default function HexCard({
               <span className="font-medium">‘{label}’</span>이(가)
               <br />
               <span className="font-medium">[{savedInfo.storageName}]</span>
-              {"   "}
               보관함에 저장되었어요.
             </div>
             <button

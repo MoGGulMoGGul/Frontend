@@ -38,13 +38,13 @@ export default function HexGridBase({ items, colCount = 5 }: Props) {
       {columns.map((col, colIdx) => (
         <div
           key={colIdx}
-          className={`flex flex-col items-center gap-3 ${
-            colIdx % 2 !== 1 ? "mt-[107px]" : "" // 필요시 === 1 로 바꿔서 홀수열만 오프셋
+          className={`flex flex-col items-center gap-3 xl:gap-4 2xl:gap-5 ${
+            colIdx % 2 !== 1 ? "mt-[96px] xl:mt-[107px] 2xl:mt-[118px]" : ""
           }`}
           style={{ width: `${100 / colCount}%` }}
         >
           {col.map((item) => (
-            <div key={item!.id} className="relative w-full hex-ar">
+            <div key={item!.id} className="relative w-full min-w-0 hex-ar">
               {/* 디자인 레이어(뒤) */}
               {item!.image && (
                 <HexImage
