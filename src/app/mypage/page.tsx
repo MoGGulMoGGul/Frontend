@@ -31,6 +31,7 @@ export default function MyPage() {
   const myStorages = useUserStorageStore((s) => s.storages);
   const myStoragesLoading = useUserStorageStore((s) => s.loading);
   const myStoragesError = useUserStorageStore((s) => s.error);
+  const loadUserProfile = useAuthStore((s) => s.loadUserProfile);
 
   // UI 상태
   const [showUserEdit, setShowUserEdit] = useState(false);
@@ -348,10 +349,17 @@ export default function MyPage() {
               initialNickname={profile.nickname}
               initialImageUrl={profile.profileImageUrl}
               onClose={() => setShowUserEdit(false)}
-              onSaved={(msg) => {
+              onSaved={async (msg) => {
                 setShowUserEdit(false);
                 openToast(msg ?? "프로필이 수정되었습니다.");
-                refetchProfile();
+                await refetchProfile();
+                if (typeof userNo === "number") {
+                  try {
+                    await loadUserProfile(userNo);
+                  } catch {
+                    /* no-op */
+                  }
+                }
               }}
             />
           )}

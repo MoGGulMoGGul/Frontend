@@ -10,7 +10,7 @@ import {
 } from "@/lib/stompClient";
 import { useAuthStore } from "@/stores/useAuthStore";
 
-// 구독 스펙: any 금지, 제네릭으로 엄격
+// 구독 스펙
 export type SubscriptionSpec<T = unknown> = {
   destination: string;
   onMessage: (msg: StompMessage<T>) => void;
