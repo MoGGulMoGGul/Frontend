@@ -39,8 +39,6 @@ export default function GrouptipStoragePage() {
 
   // 기본(보관함 자체) 꿀팁 목록
   const [baseTips, setBaseTips] = useState<StorageTipItem[]>([]);
-  const [loadingBase, setLoadingBase] = useState(true);
-  const [errorBase, setErrorBase] = useState<string | null>(null);
 
   // 이름 변경/삭제
   const [actionLoading, setActionLoading] = useState(false);
@@ -85,14 +83,8 @@ export default function GrouptipStoragePage() {
         const tips = await getStorageTips(storageNo);
         if (!alive) return;
         setBaseTips(tips);
-        setErrorBase(null);
       } catch (e) {
         console.error("보관함 꿀팁 목록 실패:", e);
-        if (!alive) return;
-        setErrorBase("보관함에 저장된 꿀팁을 불러오지 못했습니다.");
-      } finally {
-        if (!alive) return;
-        setLoadingBase(false);
       }
     })();
 
@@ -267,34 +259,22 @@ export default function GrouptipStoragePage() {
           )}
         </div>
 
-        {/* 본문: 기본 목록만 렌더 */}
-        {loadingBase ? (
-          <div>불러오는 중...</div>
-        ) : errorBase ? (
-          <div className="text-red-500">{errorBase}</div>
-        ) : baseTips.length === 0 ? (
-          <div className="text-center text-gray-500">
-            이 보관함에 저장된 꿀팁이 없습니다.
-          </div>
-        ) : (
-          <HexGridWithData<StorageTipItem>
-            items={baseTips}
-            externalLoading={false}
-            fetcher={async () => []}
-            mapItem={(t) => ({ id: t.id, label: t.title || "(제목 없음)" })}
-            imageSlotConfig={MYTIP_IMAGE_SLOTS}
-            totalSlots={30}
-            cols={5}
-            emptyBg="#D9D9D9"
-            onCardClick={(id) => {
-              // 기존 쿼리 유지 + modal만 추가
-              const sp = new URLSearchParams(window.location.search);
-              sp.set("modal", String(id));
-              router.push(`?${sp.toString()}`);
-            }}
-          />
-        )}
-
+        <HexGridWithData<StorageTipItem>
+          items={baseTips}
+          externalLoading={false}
+          fetcher={async () => []}
+          mapItem={(t) => ({ id: t.id, label: t.title || "(제목 없음)" })}
+          imageSlotConfig={MYTIP_IMAGE_SLOTS}
+          totalSlots={30}
+          cols={5}
+          emptyBg="#D9D9D9"
+          onCardClick={(id) => {
+            // 기존 쿼리 유지 + modal만 추가
+            const sp = new URLSearchParams(window.location.search);
+            sp.set("modal", String(id));
+            router.push(`?${sp.toString()}`);
+          }}
+        />
         <FloatingBtn />
 
         <ModalLayer />
