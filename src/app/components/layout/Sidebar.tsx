@@ -4,7 +4,10 @@ import BellIconWithBadge from "../BellIconWithBadge";
 import MenuItem from "../shared/MenuItem";
 import ContextMenu from "../shared/ContextMenu";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNotifications } from "./NotificationContext";
+import {
+  useNotifications,
+  useNotificationActions,
+} from "./NotificationContext";
 import Logout from "../icons/Logout";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { logout } from "@/lib/auth";
@@ -22,6 +25,7 @@ function Sidebar() {
   const openModal = (message: string) => setModal({ message });
   const closeModal = () => setModal(null);
   const notifications = useNotifications();
+  const { removeByIndex } = useNotificationActions();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -31,6 +35,12 @@ function Sidebar() {
   const nickname = useAuthStore((s) => s.nickname);
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const loadUserProfile = useAuthStore((s) => s.loadUserProfile);
+
+  useEffect(() => {
+    if (showNotif && notifications.length === 0) {
+      setShowNotif(false);
+    }
+  }, [showNotif, notifications.length]);
 
   // 초기 1회 보장
   useEnsureGroupsLoaded();
@@ -180,16 +190,23 @@ function Sidebar() {
                 onClick={() => setShowNotif((prev) => !prev)}
               >
                 <BellIconWithBadge count={notifications.length} />
-                {showNotif && (
-                  <div className="absolute right-0 mt-2">
+                {showNotif && notifications.length > 0 && (
+                  <div
+                    className="absolute left-1/2 top-full -translate-x-1/2 mt-2 z-50 w-max max-w-[min(80vw,360px)]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <ContextMenu
-                      items={notifications.map((n) => ({
+                      items={notifications.map((n, i) => ({
                         label: n.message,
                         onClick: () => {
-                          openModal(`알림 ID ${n.id} 클릭됨`);
-                          setShowNotif(false);
+                          openModal(
+                            n.id != null ? `알림을 확인하셨습니다` : n.message
+                          );
+                          removeByIndex(i);
                         },
                       }))}
+                      className="w-max max-w-[min(80vw,360px)]"
+                      itemClassName="whitespace-pre-wrap break-words"
                       onClose={() => setShowNotif(false)}
                     />
                   </div>

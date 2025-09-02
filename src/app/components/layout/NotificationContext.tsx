@@ -36,6 +36,20 @@ function isNotification(v: unknown): v is Notification {
 
 const NotificationContext = createContext<Notification[]>([]);
 
+/* 액션 컨텍스트(기본 no-op) */
+type NotificationActions = {
+  removeByIndex: (i: number) => void;
+  removeById: (id: number) => void;
+  clear: () => void;
+  push: (n: Notification) => void;
+};
+const NotificationActionsContext = createContext<NotificationActions>({
+  removeByIndex: () => {},
+  removeById: () => {},
+  clear: () => {},
+  push: () => {},
+});
+
 export default function NotificationProvider({
   children,
 }: {
@@ -89,18 +103,35 @@ export default function NotificationProvider({
     refreshConnectHeaders();
 
     return () => {
-      // 페이지 전환 등에서 끊고 싶으면 아래 줄 유지
-      // disconnectStomp();
-      // 전역 유지 원하면 끊지 말고 그대로 두세요.
+      // disconnectStomp(); // 유지 원하면 주석 유지
     };
   }, [hasHydrated, authReady, accessToken]);
 
   const value = useMemo(() => notifications, [notifications]);
+
+  const actions = useMemo<NotificationActions>(
+    () => ({
+      removeByIndex: (i) =>
+        setNotifications((prev) => prev.filter((_, idx) => idx !== i)),
+      removeById: (id) =>
+        setNotifications((prev) => prev.filter((n) => n.id !== id)),
+      clear: () => setNotifications([]),
+      push: (n) => setNotifications((prev) => [n, ...prev].slice(0, 50)),
+    }),
+    []
+  );
+
   return (
     <NotificationContext.Provider value={value}>
-      {children}
+      <NotificationActionsContext.Provider value={actions}>
+        {children}
+      </NotificationActionsContext.Provider>
     </NotificationContext.Provider>
   );
 }
 
-export const useNotifications = () => useContext(NotificationContext);
+export const useNotifications = (): Notification[] =>
+  useContext(NotificationContext);
+
+export const useNotificationActions = (): NotificationActions =>
+  useContext(NotificationActionsContext);
