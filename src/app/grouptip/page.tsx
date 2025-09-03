@@ -120,7 +120,7 @@ export default function GrouptipPage() {
               <Link
                 key={g.groupNo}
                 href={`/grouptip/group?groupNo=${g.groupNo}`}
-                className="flex flex-col hover:cursor-pointer"
+                className="flex flex-col items-center hover:cursor-pointer"
               >
                 <div className="relative mb-3">
                   <Image

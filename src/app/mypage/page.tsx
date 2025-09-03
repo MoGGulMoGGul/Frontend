@@ -143,13 +143,13 @@ export default function MyPage() {
 
   return (
     <>
-      {/* 전체 공개 꿀팁 검색으로 /search 이동 */}
+      {/* 내 꿀팁 검색으로 /search 이동 */}
       <SearchBar
-        placeholder="전체 꿀팁 검색"
+        placeholder="내 꿀팁 검색"
         onSearch={(q) => {
           const keyword = (q ?? "").trim();
           if (!keyword) return;
-          const params = new URLSearchParams({ scope: "public", q: keyword });
+          const params = new URLSearchParams({ scope: "my", q: keyword });
           router.push(`/search?${params.toString()}`);
         }}
       />
