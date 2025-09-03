@@ -7,6 +7,7 @@ import ModalCancelBtn from "./ModalCancelBtn";
 import { useGroupStore } from "@/stores/useGroupStorageStore";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
 import { saveBookMarkTip } from "@/lib/tips";
+import { getStoragesByGroup } from "@/lib/storage"; // ★ 추가
 
 type Props = {
   tipNo: number;
@@ -38,17 +39,32 @@ export default function SaveTipModal({ tipNo, onClose }: Props) {
         return;
       }
 
+      // 추가: 그룹만 선택된 경우 → 해당 그룹의 보관함 목록을 조회해서 storageNo 확보 후 저장
+      if (!selectedStorageNo && selectedGroupNo) {
+        const groupStorages = await getStoragesByGroup(selectedGroupNo);
+        // 첫 번째 항목을 기본 보관함으로 사용 (필요 시 정렬/선택 규칙 반영)
+        const sNo =
+          groupStorages.length > 0 ? groupStorages[0].storageNo : null;
+
+        if (sNo != null) {
+          await saveBookMarkTip({ tipNo, storageNo: sNo });
+          setResult({ type: "success", message: "보관함에 저장했어요." });
+          return;
+        } else {
+          setResult({
+            type: "error",
+            message:
+              "선택한 그룹의 보관함을 찾을 수 없어요. 그룹 보관함 설정을 확인해 주세요.",
+          });
+          return;
+        }
+      }
+
       if (selectedStorageNo) {
         await saveBookMarkTip({ tipNo, storageNo: selectedStorageNo });
         setResult({ type: "success", message: "내 보관함에 저장했어요." });
         return;
       }
-
-      // 그룹 저장 API 연결 시 아래 분기 사용
-      // if (selectedGroupNo) {
-      //   await saveToGroupTip({ tipNo, groupNo: selectedGroupNo });
-      //   setResult({ type: "success", message: "그룹 보관함에 저장했어요." });
-      // }
     } catch (err) {
       console.error(err);
       setResult({
@@ -125,7 +141,7 @@ export default function SaveTipModal({ tipNo, onClose }: Props) {
               onChange={(e) => {
                 const val = e.target.value ? Number(e.target.value) : null;
                 setSelectedGroupNo(val);
-                if (val !== null) setSelectedStorageNo(null); // 서로 배타
+                // 저장 시에 안전하게 storageNo를 조회/해석하므로 여기선 세팅만
               }}
               disabled={selectedStorageNo !== null}
             >

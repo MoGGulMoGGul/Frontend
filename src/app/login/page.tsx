@@ -119,6 +119,7 @@ export default function Login() {
             >
               <div className="flex flex-col mb-6">
                 <LabeledInput
+                  id="loginId"
                   label="아이디 및 이메일"
                   name="id"
                   value={form.id}
@@ -126,6 +127,7 @@ export default function Login() {
                   autoComplete="off"
                 />
                 <LabeledInput
+                  id="loginPassword"
                   label="비밀번호"
                   type="password"
                   name="password"
@@ -135,7 +137,11 @@ export default function Login() {
                 />
               </div>
               {/* 버튼은 기존 그대로 (onClick 유지) */}
-              <YellowLBtn label="로그인하기" onClick={handleLogin} />
+              <YellowLBtn
+                label="로그인하기"
+                onClick={handleLogin}
+                id="loginButton"
+              />
             </form>
 
             <div className="flex items-center justify-center text-sm font-medium hover:cursor-pointer mb-16">

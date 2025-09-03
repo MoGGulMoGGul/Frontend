@@ -8,6 +8,7 @@ import NotificationProvider from "@/app/components/layout/NotificationContext";
 import AuthGate from "@/app/components/auth/AuthGate";
 import AppFrame from "@/app/components/layout/AppFrame";
 import AuthBootstrap from "@/app/components/auth/AuthBootstrap";
+import AuthReadyFlag from "./components/system/AuthReadyFlag";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -60,6 +61,7 @@ export default function RootLayout({
             <AuthGate>
               <AppFrame>{children}</AppFrame>
             </AuthGate>
+            <AuthReadyFlag />
           </Suspense>
         </NotificationProvider>
       </body>

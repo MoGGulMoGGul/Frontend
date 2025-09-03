@@ -6,6 +6,7 @@ interface LabeledInputProps {
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   autoComplete?: string;
+  id?: string;
 }
 
 export default function LabeledInput({
@@ -16,12 +17,14 @@ export default function LabeledInput({
   value,
   onChange,
   autoComplete,
+  id,
 }: LabeledInputProps) {
   return (
     <div className="flex flex-col mb-3">
       <div className="text-sm mb-1 font-medium">{label}</div>
       <div>
         <input
+          id={id}
           name={name}
           type={type}
           placeholder={placeholder}

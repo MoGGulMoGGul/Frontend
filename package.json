@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -29,7 +30,11 @@
     "eslint-config-next": "15.3.5",
     "json-server": "^0.17.4",
     "postcss": "^8.5.6",
+    "puppeteer": "^24.18.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5"
+  },
+   "files.associations": {
+    "*.cjs": "javascript"
   }
 }
