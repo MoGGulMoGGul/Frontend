@@ -19,7 +19,7 @@ type ImageSlot = {
   z?: number;
 };
 
-const TOTAL_SLOTS = 30;
+const MIN_SLOTS = 30; // '최소' 슬롯 수(디자인 유지용)
 const COLS = 5;
 const EMPTY_BG = "#D9D9D9"; // 데이터 없는 칸(회색)
 
@@ -56,7 +56,24 @@ export default function HexGrid() {
     })();
   }, []);
 
-  // 30칸: 이미지 슬롯은 고정 예약, 나머지 칸에 팁을 순차 배치
+  // 필요한 총 슬롯 수 자동 계산(한 행 단위로 확장)
+  const computedTotalSlots = useMemo(() => {
+    const imagePositions = Object.keys(MYTIP_IMAGE_SLOTS)
+      .map(Number)
+      .sort((a, b) => a - b);
+    const maxImgIdx = imagePositions[imagePositions.length - 1] ?? 0;
+    const minSlots = Math.max(MIN_SLOTS, maxImgIdx);
+    const countImgs = (limit: number) =>
+      imagePositions.filter((i) => i <= limit).length;
+
+    let s = minSlots;
+    while (s - countImgs(s) < tips.length) {
+      s += COLS; // 한 행씩 확장
+    }
+    return Math.ceil(s / COLS) * COLS;
+  }, [tips.length]);
+
+  // 이미지 슬롯은 고정 예약, 나머지 칸에 팁을 순차 배치
   const slots = useMemo(() => {
     const result: Array<
       | { type: "image"; idx: number; cfg: ImageSlot }
@@ -65,7 +82,7 @@ export default function HexGrid() {
     const imageIdx = new Set(Object.keys(MYTIP_IMAGE_SLOTS).map(Number));
     const dataTips = [...tips];
 
-    for (let i = 1; i <= TOTAL_SLOTS; i++) {
+    for (let i = 1; i <= computedTotalSlots; i++) {
       if (imageIdx.has(i)) {
         result.push({ type: "image", idx: i, cfg: MYTIP_IMAGE_SLOTS[i] });
       } else {
@@ -73,18 +90,18 @@ export default function HexGrid() {
       }
     }
     return result;
-  }, [tips]);
+  }, [tips, computedTotalSlots]);
 
   // 열 단위 재배치
   const columns = useMemo(() => {
-    const rows = Math.ceil(TOTAL_SLOTS / COLS);
+    const rows = Math.ceil(computedTotalSlots / COLS);
     return Array.from({ length: COLS }, (_, colIdx) =>
       Array.from({ length: rows }, (_, rowIdx) => {
         const index = rowIdx * COLS + colIdx;
         return slots[index];
       }).filter(Boolean)
     );
-  }, [slots]);
+  }, [slots, computedTotalSlots]);
 
   if (loading) return <div className="text-center py-10">불러오는 중...</div>;
 
