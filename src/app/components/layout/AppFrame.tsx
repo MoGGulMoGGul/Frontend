@@ -16,8 +16,10 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
   if (hideSidebar) {
     // 로그인 전/로그인 페이지: 사이드바 없이 콘텐츠만
     return (
-      <main className="flex-1 px-6">
-        <div className="max-w-screen-xl mx-auto">{children}</div>
+      <main className="flex-1 px-6 overflow-x-hidden">
+        <div className="w-full max-w-screen-xl mx-auto px-6 overflow-x-hidden">
+          {children}
+        </div>
       </main>
     );
   }
@@ -28,8 +30,8 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
       <aside className="w-[236px] xl:w-[260px] 2xl:w-[300px] flex-shrink-0 relative z-10">
         <Sidebar />
       </aside>
-      <main className="flex-1 px-4 xl:px-6 2xl:px-8">
-        <div className="mx-auto max-w-screen-xl 2xl:max-w-[1600px]">
+      <main className="flex-1 px-4 xl:px-6 2xl:px-8 overflow-x-hidden">
+        <div className="w-full mx-auto max-w-screen-xl 2xl:max-w-[1600px] px-6 overflow-x-hidden">
           {children}
         </div>
       </main>

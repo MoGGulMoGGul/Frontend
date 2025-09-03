@@ -110,12 +110,24 @@ export default function HexCard({
     >
       {/* 본 카드: 투명이면 내부 텍스트 렌더링 X */}
       <HexagonWrapper bg={transparent ? "transparent" : colorSet.bg}>
-        {!transparent && label}
+        {!transparent && (
+          <span className="block mx-auto max-w-[90%] text-center truncate whitespace-nowrap">
+            {label}
+          </span>
+        )}
       </HexagonWrapper>
 
       {/* 캡션: 항상 표시 */}
       <div className="w-full min-w-0 px-1">
-        <div className="truncate text-center mt-1 mx-auto text-[clamp(12px,0.9vw,14px)] max-w-[92%] xl:max-w-[86%] 2xl:max-w-[80%]">
+        <div
+          className="
+        mt-1 mx-auto text-center
+        text-[clamp(12px,0.9vw,14px)]
+        max-w-[92%] xl:max-w-[86%] 2xl:max-w-[80%]
+        h-[18px] leading-[18px]
+        overflow-hidden text-ellipsis whitespace-nowrap
+      "
+        >
           {label}
         </div>
       </div>

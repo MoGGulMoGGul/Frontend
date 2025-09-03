@@ -16,8 +16,8 @@ export default function Main() {
   const openModal = (id: number) => router.push(`?modal=${id}`);
 
   return (
-    <div className="flex relative">
-      <main className="flex-1 relative">
+    <div className="relative">
+      <main className="relative overflow-x-clip">
         {/* 항상 전체 공개 꿀팁 피드만 표시 */}
         <HexGridWithData<PublicTipItem>
           fetcher={getPublicTips}

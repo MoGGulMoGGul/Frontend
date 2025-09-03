@@ -136,6 +136,7 @@ export default function HexGridWithData<TRaw>({
                   ) : (
                     <HexagonWrapper bg="transparent" />
                   )}
+                  <div className="mt-1 h-[18px]" aria-hidden />
                 </div>
               );
             }
@@ -150,7 +151,7 @@ export default function HexGridWithData<TRaw>({
                 >
                   <HexCard
                     id={Number(item.id)}
-                    label={item.label || "(제목 없음)"}
+                    label={item.label?.trim() || "(제목 없음)"}
                     onCardClick={(nid) => onCardClick?.(nid)}
                     userNo={1}
                   />
@@ -162,6 +163,7 @@ export default function HexGridWithData<TRaw>({
             return (
               <div key={`empty-${slot.idx}`} className="relative w-full hex-ar">
                 <HexagonWrapper className="pointer-events-none" bg={emptyBg} />
+                <div className="mt-1 h-[18px]" aria-hidden />
               </div>
             );
           })}
