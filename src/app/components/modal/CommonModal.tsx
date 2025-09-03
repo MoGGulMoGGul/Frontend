@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 type CommonModalProps = {
   children: React.ReactNode;
@@ -13,24 +14,25 @@ export default function CommonModal({
   onClose,
   closeOnBackdrop = true,
 }: CommonModalProps) {
-  // 스크롤 잠금 + ESC로 닫기(옵션)
+  // 스크롤 잠금 + ESC 닫기
   useEffect(() => {
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && onClose) onClose();
+      if (e.key === "Escape") onClose?.();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = prev;
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [onClose]);
 
-  return (
+  const node = (
     <div
       className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center mx-0"
       onClick={() => {
-        if (closeOnBackdrop && onClose) onClose();
+        if (closeOnBackdrop) onClose?.();
       }}
     >
       <div
@@ -41,4 +43,6 @@ export default function CommonModal({
       </div>
     </div>
   );
+
+  return createPortal(node, document.body);
 }

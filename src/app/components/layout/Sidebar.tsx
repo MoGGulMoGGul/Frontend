@@ -18,6 +18,7 @@ import { useEnsureUserStoragesLoaded } from "@/hooks/useEnsureUserStoragesLoaded
 import { useEnsureGroupsLoaded } from "@/hooks/useEnsureGroupsLoaded";
 import CommonModal from "../modal/CommonModal";
 import OkBtn from "../common/OkBtn";
+import { createPortal } from "react-dom";
 
 function Sidebar() {
   const [showNotif, setShowNotif] = useState(false);
@@ -28,6 +29,10 @@ function Sidebar() {
   const { removeByIndex } = useNotificationActions();
   const router = useRouter();
   const pathname = usePathname();
+  const bellRef = useRef<HTMLDivElement | null>(null);
+  const [menuPos, setMenuPos] = useState<{ left: number; top: number } | null>(
+    null
+  );
 
   const accessToken = useAuthStore((s) => s.accessToken);
   const clearAuth = useAuthStore((s) => s.clearAuth);
@@ -35,6 +40,26 @@ function Sidebar() {
   const nickname = useAuthStore((s) => s.nickname);
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const loadUserProfile = useAuthStore((s) => s.loadUserProfile);
+
+  useEffect(() => {
+    if (!showNotif) {
+      setMenuPos(null);
+      return;
+    }
+    const update = () => {
+      const el = bellRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setMenuPos({ left: r.left + r.width / 2, top: r.bottom + 8 });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [showNotif]);
 
   useEffect(() => {
     if (showNotif && notifications.length === 0) {
@@ -186,31 +211,41 @@ function Sidebar() {
               </div>
 
               <div
+                ref={bellRef}
                 className="relative"
                 onClick={() => setShowNotif((prev) => !prev)}
               >
                 <BellIconWithBadge count={notifications.length} />
-                {showNotif && notifications.length > 0 && (
-                  <div
-                    className="absolute left-1/2 top-full -translate-x-1/2 mt-2 z-50 w-max max-w-[min(80vw,360px)]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <ContextMenu
-                      items={notifications.map((n, i) => ({
-                        label: n.message,
-                        onClick: () => {
-                          openModal(
-                            n.id != null ? `알림을 확인하셨습니다` : n.message
-                          );
-                          removeByIndex(i);
-                        },
-                      }))}
-                      className="w-max max-w-[min(80vw,360px)]"
-                      itemClassName="whitespace-pre-wrap break-words"
-                      onClose={() => setShowNotif(false)}
-                    />
-                  </div>
-                )}
+                {showNotif &&
+                  notifications.length > 0 &&
+                  menuPos &&
+                  createPortal(
+                    <div
+                      className="fixed z-40 max-w-[min(80vw,360px)]"
+                      style={{
+                        left: menuPos.left,
+                        top: menuPos.top,
+                        transform: "translateX(-50%)",
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ContextMenu
+                        items={notifications.map((n, i) => ({
+                          label: n.message,
+                          onClick: () => {
+                            openModal(
+                              n.id != null ? "알림을 확인하셨습니다" : n.message
+                            );
+                            removeByIndex(i);
+                          },
+                        }))}
+                        className="w-max max-w-[min(80vw,360px)]"
+                        itemClassName="whitespace-pre-wrap break-words"
+                        onClose={() => setShowNotif(false)}
+                      />
+                    </div>,
+                    document.body
+                  )}
               </div>
             </div>
 
