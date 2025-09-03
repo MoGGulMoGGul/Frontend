@@ -134,7 +134,7 @@ export default function HexGrid() {
               return (
                 <div
                   key={`tip-${slot.idx}`}
-                  className="relative w-full min-w-0 hex-ar overflow-hidden"
+                  className="relative w-full min-w-0 hex-ar overflow-visible"
                 >
                   <HexCard
                     id={tip.no}

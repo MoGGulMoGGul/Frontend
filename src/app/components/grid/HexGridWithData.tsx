@@ -146,7 +146,7 @@ export default function HexGridWithData<TRaw>({
               return (
                 <div
                   key={`data-${slot.idx}`}
-                  className="relative w-full hex-ar overflow-hidden"
+                  className="relative w-full hex-ar overflow-visible"
                 >
                   <HexCard
                     id={Number(item.id)}

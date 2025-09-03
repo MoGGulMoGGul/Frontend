@@ -44,7 +44,10 @@ export default function HexGridBase({ items, colCount = 5 }: Props) {
           style={{ width: `${100 / colCount}%` }}
         >
           {col.map((item) => (
-            <div key={item!.id} className="relative w-full min-w-0 hex-ar">
+            <div
+              key={item!.id}
+              className="relative w-full min-w-0 hex-ar overflow-visible"
+            >
               {/* 디자인 레이어(뒤) */}
               {item!.image && (
                 <HexImage

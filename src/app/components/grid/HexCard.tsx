@@ -144,7 +144,7 @@ export default function HexCard({
 
       {/* 컨텍스트 메뉴: 내 보관함 목록 */}
       {showMenu && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 mt-2 z-20">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 mt-4 z-20">
           <ContextMenu items={menuItems} onClose={() => setShowMenu(false)} />
         </div>
       )}

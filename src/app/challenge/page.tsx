@@ -81,7 +81,7 @@ export default function ChallengePage() {
                         <Image
                           src={resolveLocalThumb(
                             item.thumbnailUrl,
-                            "/img/placeholder.png"
+                            "/img/1bee.png"
                           )}
                           alt={item.title}
                           sizes="100px"
@@ -108,9 +108,12 @@ export default function ChallengePage() {
                         <div className="flex items-center gap-2">
                           <div className="relative  w-[20px] h-[20px] rounded-full overflow-hidden bg-[#d9d9d9]">
                             <Image
-                              src="/img/honeybee.png"
-                              alt={item.nickname}
-                              sizes="20px"
+                              src={resolveLocalThumb(
+                                item.thumbnailUrl,
+                                "/img/1bee.png"
+                              )}
+                              alt={item.title}
+                              sizes="20"
                               fill
                             />
                           </div>
