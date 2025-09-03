@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/app/components/common/SearchBar";
-import HexGridWithData from "@/app/components/grid/HexGridWithData";
+import HexGridWithData, {
+  type HexItem,
+} from "@/app/components/grid/HexGridWithData";
 import ModalDetailContent from "@/app/components/modal/ModalDetailContent";
 import { MYTIP_IMAGE_SLOTS } from "@/app/components/grid/TipImageSlots";
 
@@ -29,15 +31,36 @@ export default function SearchPage() {
     : undefined;
   const userNo = sp.get("userNo") ? Number(sp.get("userNo")) : undefined;
 
-  const modalId = sp.get("modal");
+  // --- 모달 파라미터: 숫자 변환 + 유효성 검사 (Home과 동일한 가드) ---
+  const modalId = useMemo(() => {
+    const raw = sp.get("modal");
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }, [sp]);
 
   const [results, setResults] = useState<TipSearchItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const nfmt = useMemo(() => new Intl.NumberFormat(), []);
 
+  // --- 검색결과를 HexItem으로 정규화: id는 tipId > no > id 우선순위 ---
+  const mapSearchItemToHex = (t: TipSearchItem): HexItem => {
+    const anyT = t as unknown as Record<string, unknown>;
+    const id =
+      (anyT["tipId"] as number | undefined) ??
+      (anyT["no"] as number | undefined) ??
+      (anyT["id"] as number | undefined);
+
+    return {
+      id: id as number, // 아래 가드들로 undefined 방지
+      label: (anyT["title"] as string) || "(제목 없음)",
+    };
+  };
+
+  // --- scope별 파라미터 없으면 즉시 no-op 검색으로 에러/불필요 호출 방지 ---
   const runSearch = useMemo(() => {
-    // scope 별로 필요한 파라미터를 정확히 넘김
+    // 검색 공통 콜백
     const base = {
       mode: "OR" as const,
       page: 0,
@@ -54,23 +77,33 @@ export default function SearchPage() {
       },
     };
 
+    // 파라미터 누락 시 no-op
+    const noop: (q: string) => void = () => {
+      setResults([]);
+      setLoading(false);
+      setHasSearched(true);
+    };
+
     switch (scope) {
       case "public":
       case "my":
         return createSearchHandler({ ...base, scope });
       case "group":
+        if (!Number.isFinite(Number(groupId))) return noop;
         return createSearchHandler({
           ...base,
           scope: "group",
           groupId: groupId as number,
         });
       case "storage":
+        if (!Number.isFinite(Number(storageId))) return noop;
         return createSearchHandler({
           ...base,
           scope: "storage",
           storageId: storageId as number,
         });
       case "user":
+        if (!Number.isFinite(Number(userNo))) return noop;
         return createSearchHandler({
           ...base,
           scope: "user",
@@ -108,7 +141,7 @@ export default function SearchPage() {
         placeholder={placeholder}
         defaultValue={q}
         onSearch={(next) => {
-          const nextQ = next.trim();
+          const nextQ = (next ?? "").trim();
           if (!nextQ) return;
           const params = new URLSearchParams(sp.toString());
           params.set("q", nextQ);
@@ -129,8 +162,8 @@ export default function SearchPage() {
               총 {nfmt.format(results.length)}건
             </div>
             <HexGridWithData<TipSearchItem>
-              fetcher={async () => []}
-              mapItem={(t) => ({ id: t.id, label: t.title || "(제목 없음)" })}
+              fetcher={async () => []} // 외부에서 items를 직접 주입
+              mapItem={mapSearchItemToHex}
               imageSlotConfig={MYTIP_IMAGE_SLOTS}
               totalSlots={30}
               cols={5}
@@ -138,8 +171,10 @@ export default function SearchPage() {
               items={results}
               externalLoading={loading}
               onCardClick={(id) => {
+                const n = Number(id);
+                if (!Number.isFinite(n)) return;
                 const params = new URLSearchParams(sp.toString());
-                params.set("modal", String(id));
+                params.set("modal", String(n));
                 router.push(`/search?${params.toString()}`);
               }}
             />
@@ -153,13 +188,15 @@ export default function SearchPage() {
         )}
       </div>
 
-      {modalId && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+      {/*  유효한 숫자일 때만 모달 렌더 */}
+      {modalId !== null && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="bg-white p-6 rounded-lg">
-            <ModalDetailContent
-              id={parseInt(modalId)}
-              onClose={() => router.back()}
-            />
+            <ModalDetailContent id={modalId} onClose={() => router.back()} />
           </div>
         </div>
       )}
