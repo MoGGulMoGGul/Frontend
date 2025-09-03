@@ -1,6 +1,5 @@
 /* ==================== Imports ==================== */
 import { apiRequest } from "@/lib/apiClient";
-import { authHeader } from "@/lib/authHeader";
 
 /* ==================== 타입 ==================== */
 export type CreateStorageRequest = { name: string; groupNo?: number | null };
@@ -49,18 +48,21 @@ export type TipSearchItem = {
   createdAt: string;
 };
 
+export type AllGroupStorageItem = {
+  storageNo: number;
+  name: string;
+  userNo: number;
+};
 /* ==================== API: Storage ==================== */
 
 /** 보관함 생성 */
 export const createStorage = async (
   data: CreateStorageRequest
 ): Promise<CreateStorageResponse> => {
-  const headers = authHeader();
   const created = await apiRequest<BackendCreateStorageResponse>(
     "POST",
     "/api/storage",
     {
-      headers,
       data: { name: data.name, groupNo: data.groupNo ?? null },
     }
   );
@@ -123,13 +125,11 @@ export const updateStorageName = async (
   storageNo: number,
   name: string
 ): Promise<{ storageNo: number; name: string }> => {
-  const headers = authHeader();
   return await apiRequest<{ storageNo: number; name: string }>(
     "PUT",
     `/api/storage/${storageNo}`,
     {
-      headers,
-      data: { name }, // JSON 객체로 전송
+      data: { name },
     }
   );
 };
@@ -138,10 +138,13 @@ export const updateStorageName = async (
 export const deleteStorage = async (
   storageNo: number
 ): Promise<{ message: string }> => {
-  const headers = authHeader();
-  return await apiRequest<{ message: string }>(
-    "DELETE",
-    `/api/storage/${storageNo}`,
-    { headers }
+  return apiRequest<{ message: string }>("DELETE", `/api/storage/${storageNo}`);
+};
+
+/** 전체 그룹 보관함 조회 */
+export const getAllGroupStorages = async (): Promise<AllGroupStorageItem[]> => {
+  return apiRequest<AllGroupStorageItem[]>(
+    "GET",
+    "/api/query/storage/group-all"
   );
 };

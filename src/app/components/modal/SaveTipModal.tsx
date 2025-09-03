@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommonModal from "./CommonModal";
 import OkBtn from "../common/OkBtn";
 import ModalCancelBtn from "./ModalCancelBtn";
-import { useGroupStore } from "@/stores/useGroupStorageStore";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
 import { saveBookMarkTip } from "@/lib/tips";
-import { getStoragesByGroup } from "@/lib/storage"; // ★ 추가
+import { getAllGroupStorages } from "@/lib/storage"; // 그룹 보관함 전체 조회
 
 type Props = {
   tipNo: number;
@@ -15,20 +14,37 @@ type Props = {
 };
 
 export default function SaveTipModal({ tipNo, onClose }: Props) {
-  const { groups } = useGroupStore();
   const { storages } = useUserStorageStore();
 
+  // 선택된 그룹 보관함의 storageNo"
   const [selectedGroupNo, setSelectedGroupNo] = useState<number | null>(null);
   const [selectedStorageNo, setSelectedStorageNo] = useState<number | null>(
     null
   );
   const [saving, setSaving] = useState(false);
 
+  // 그룹 보관함 목록 상태
+  const [groupStorages, setGroupStorages] = useState<
+    { storageNo: number; name: string; userNo: number }[]
+  >([]);
+
   // 결과 모달 상태
   const [result, setResult] = useState<null | {
     type: "success" | "error" | "info";
     message: string;
   }>(null);
+
+  // 최초 1회: 그룹 보관함 전체 로드
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await getAllGroupStorages();
+        setGroupStorages(list);
+      } catch {
+        // 조용히 실패하여 기존 흐름 유지
+      }
+    })();
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -39,27 +55,14 @@ export default function SaveTipModal({ tipNo, onClose }: Props) {
         return;
       }
 
-      // 추가: 그룹만 선택된 경우 → 해당 그룹의 보관함 목록을 조회해서 storageNo 확보 후 저장
+      // 그룹 보관함 선택 시: selectedGroupNo === 선택된 그룹 보관함의 storageNo
       if (!selectedStorageNo && selectedGroupNo) {
-        const groupStorages = await getStoragesByGroup(selectedGroupNo);
-        // 첫 번째 항목을 기본 보관함으로 사용 (필요 시 정렬/선택 규칙 반영)
-        const sNo =
-          groupStorages.length > 0 ? groupStorages[0].storageNo : null;
-
-        if (sNo != null) {
-          await saveBookMarkTip({ tipNo, storageNo: sNo });
-          setResult({ type: "success", message: "보관함에 저장했어요." });
-          return;
-        } else {
-          setResult({
-            type: "error",
-            message:
-              "선택한 그룹의 보관함을 찾을 수 없어요. 그룹 보관함 설정을 확인해 주세요.",
-          });
-          return;
-        }
+        await saveBookMarkTip({ tipNo, storageNo: selectedGroupNo });
+        setResult({ type: "success", message: "보관함에 저장했어요." });
+        return;
       }
 
+      // 개인 보관함
       if (selectedStorageNo) {
         await saveBookMarkTip({ tipNo, storageNo: selectedStorageNo });
         setResult({ type: "success", message: "내 보관함에 저장했어요." });
@@ -96,7 +99,7 @@ export default function SaveTipModal({ tipNo, onClose }: Props) {
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-bold">저장할 장소 선택</h2>
 
-        {/* 개인 보관함 */}
+        {/* 개인 보관함 (그대로) */}
         <div>
           <label className="block text-sm font-medium mb-1">내 보관함</label>
           <div className="relative">
@@ -130,24 +133,24 @@ export default function SaveTipModal({ tipNo, onClose }: Props) {
           </div>
         </div>
 
-        {/* 그룹 보관함 */}
+        {/* 그룹 보관함: 이제 groupStorages(보관함 목록) 사용 */}
         <div>
           <label className="block text-sm font-medium mb-1">그룹 보관함</label>
           <div className="relative">
             <select
               className={selectBase}
-              value={selectedGroupNo ?? ""}
+              value={selectedGroupNo ?? ""} // 기존 상태명 그대로 사용
               onChange={(e) => {
                 const val = e.target.value ? Number(e.target.value) : null;
-                setSelectedGroupNo(val);
-                // 저장 시에 안전하게 storageNo를 조회/해석하므로 여기선 세팅만
+                setSelectedGroupNo(val); // storageNo를 상태에 저장
+                if (val !== null) setSelectedStorageNo(null); // 서로 배타
               }}
               disabled={selectedStorageNo !== null}
             >
               <option value="">선택 안 함</option>
-              {groups.map((g) => (
-                <option key={g.groupNo} value={g.groupNo}>
-                  {g.name} ({g.memberCount}명)
+              {groupStorages.map((gs) => (
+                <option key={gs.storageNo} value={gs.storageNo}>
+                  {gs.name}
                 </option>
               ))}
             </select>
