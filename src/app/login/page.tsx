@@ -186,8 +186,8 @@ export default function Login() {
                       {modalMessage}
                     </p>
                   )}
-                  <YellowLBtn label="아이디 찾기" onClick={handleFindId} />
-                  <div className="flex justify-center">
+                  <div className="mt-2 flex justify-end items-center gap-2 flex-nowrap">
+                    <OkBtn label="아이디 찾기" onClick={handleFindId} />
                     <ModalCancelBtn label="닫기" onClose={closeModal} />
                   </div>
                 </div>
@@ -222,7 +222,7 @@ export default function Login() {
                       {modalMessage}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="mt-2 flex justify-end items-center gap-2 flex-nowrap">
                     <OkBtn label="재설정하기" onClick={handleResetPw} />
                     <ModalCancelBtn label="닫기" onClose={closeModal} />
                   </div>
