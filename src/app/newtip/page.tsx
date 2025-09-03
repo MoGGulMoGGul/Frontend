@@ -80,8 +80,7 @@ export default function NewtipPage() {
         const list = await getStoragesByGroup(groupNoFromQuery);
         if (!alive) return;
         setGroupStorages(list);
-      } catch (err: unknown) {
-        console.error("그룹 보관함 목록 로딩 실패:", err);
+      } catch {
         if (!alive) return;
         setGroupStorages([]);
       } finally {
@@ -177,8 +176,7 @@ export default function NewtipPage() {
       if (thumb) setThumbnailUrl(thumb);
 
       setHasDraft(true);
-    } catch (err: unknown) {
-      console.error("요약 생성 실패:", err);
+    } catch {
       openInfo("요약 생성에 실패했습니다.");
     } finally {
       setSummarizing(false);
@@ -208,8 +206,7 @@ export default function NewtipPage() {
         isPublic,
       });
       openInfo("꿀팁이 저장되었습니다!", onClose);
-    } catch (err: unknown) {
-      console.error("꿀팁 저장 실패:", err);
+    } catch {
       openInfo("꿀팁 저장에 실패했습니다.");
     } finally {
       setSaving(false);

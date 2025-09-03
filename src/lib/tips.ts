@@ -157,7 +157,6 @@ export async function createTipDraft(
     data,
     timeout: 60_000, // apiRequest에서 timeout 지원하도록 구현되어 있어야 함
   });
-  console.log("[tips] createTipDraft response:", res);
   return res;
 }
 

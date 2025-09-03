@@ -52,14 +52,11 @@ export default function SignUp() {
 
     try {
       await signup(id, nickname, password);
-      console.log("회원가입 성공!");
       setShowModal(true);
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-    } catch (error) {
-      console.error("회원가입 실패", error);
-    }
+    } catch {}
   };
 
   const handleCheckIdDuplicate = async () => {
@@ -75,9 +72,7 @@ export default function SignUp() {
           ? "이미 사용 중인 아이디입니다. ❌"
           : "사용 가능한 아이디입니다! ✅"
       );
-    } catch (error) {
-      console.error("아이디 중복검사 실패", error);
-    }
+    } catch {}
   };
 
   const handleCheckNicknameDuplicate = async () => {
@@ -93,9 +88,7 @@ export default function SignUp() {
           ? "이미 사용 중인 닉네임입니다. ❌"
           : "사용 가능한 닉네임입니다! ✅"
       );
-    } catch (error) {
-      console.error("닉네임 중복검사 실패", error);
-    }
+    } catch {}
   };
 
   return (

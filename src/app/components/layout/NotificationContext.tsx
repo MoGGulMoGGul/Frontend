@@ -73,8 +73,7 @@ export default function NotificationProvider({
       () => {
         // 2) onConnected: 필요한 목적지 구독 (중복 방지됨)
         ensureSubscribe(`${TOPIC_PREFIX}/feed`, (m: StompMessage<unknown>) => {
-          const payload = parseJsonSafe(m.body);
-          console.log("📢 FEED", payload);
+          void parseJsonSafe(m.body);
         });
 
         ensureSubscribe(
@@ -84,7 +83,6 @@ export default function NotificationProvider({
             if (isNotification(payload)) {
               setNotifications((prev) => [payload, ...prev].slice(0, 50));
             } else {
-              console.warn("📬 ME(unrecognized payload)", payload);
             }
           }
         );
@@ -92,8 +90,7 @@ export default function NotificationProvider({
         ensureSubscribe(
           `${TOPIC_PREFIX}/tips/rank/views`,
           (m: StompMessage<unknown>) => {
-            const payload = parseJsonSafe(m.body);
-            console.log("🏆 RANK", payload);
+            void parseJsonSafe(m.body);
           }
         );
       }

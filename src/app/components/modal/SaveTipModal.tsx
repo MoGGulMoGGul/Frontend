@@ -65,8 +65,7 @@ export default function SaveTipModal({ tipNo, onClose }: Props) {
         setResult({ type: "success", message: "내 보관함에 저장했어요." });
         return;
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setResult({
         type: "error",
         message: "저장에 실패했어요. 잠시 후 다시 시도해 주세요.",

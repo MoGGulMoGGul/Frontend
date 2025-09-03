@@ -32,8 +32,7 @@ export default function HexGrid() {
       setLoading(true);
       const list = await getMyTips();
       setTips(list);
-    } catch (e) {
-      console.error("내 꿀팁 조회 실패", e);
+    } catch {
     } finally {
       setLoading(false);
     }
@@ -48,8 +47,7 @@ export default function HexGrid() {
       try {
         const list = await getMyTips();
         setTips(list);
-      } catch (e) {
-        console.error("내 꿀팁 조회 실패", e);
+      } catch {
       } finally {
         setLoading(false);
       }

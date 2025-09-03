@@ -81,8 +81,7 @@ export default function MyPage() {
       setNewStorageName("");
       openToast("보관함이 생성되었습니다.");
       router.push(`/mytip/storage?storageNo=${created.storageNo}`);
-    } catch (e) {
-      console.error(e);
+    } catch {
       openToast("보관함 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setCreating(false);
@@ -104,8 +103,7 @@ export default function MyPage() {
       setShowWithdrawalModal(false);
       openToast("회원탈퇴가 완료되었습니다.");
       setTimeout(() => router.push("/"), 300);
-    } catch (error) {
-      console.error("회원탈퇴 실패", error);
+    } catch {
       setShowWithdrawalModal(false);
       openToast("회원탈퇴에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     }
@@ -117,8 +115,7 @@ export default function MyPage() {
     setLoading(true);
     getUserProfile(userNo)
       .then(setProfile)
-      .catch((err) => {
-        console.error("유저 정보 불러오기 실패", err);
+      .catch(() => {
         openToast("유저 정보를 불러오지 못했어요.");
       })
       .finally(() => setLoading(false));
@@ -131,8 +128,7 @@ export default function MyPage() {
     try {
       const p = await getUserProfile(userNo);
       setProfile(p);
-    } catch (err) {
-      console.error("유저 정보 불러오기 실패", err);
+    } catch {
       openToast("유저 정보를 불러오지 못했어요.");
     } finally {
       setLoading(false);
@@ -221,7 +217,7 @@ export default function MyPage() {
                 aria-expanded={showFollowerList}
                 title="팔로워 목록 보기"
               >
-                <div className="w-10 aspect-[2/3] absolute -top-6 left-[50px] opacity-80 group-hover:opacity-100 transition-opacity">
+                <div className="w-10 aspect-[2/3] absolute -top-6 left-[50px] opacity-80 transition-opacity">
                   <Image
                     src="/img/1bee.png"
                     alt="꿀벌"
@@ -241,7 +237,7 @@ export default function MyPage() {
               {/* 회원탈퇴 버튼 */}
               <button
                 onClick={() => setShowWithdrawalModal(true)}
-                className="w-24 h-12 rounded-xl border border-[var(--color-honey-pale)] bg-white hover:bg-[var(--color-honey-pale)]"
+                className="w-24 h-12 rounded-xl border border-[var(--color-honey-pale)] bg-white hover:bg-[var(--color-honey-pale)] cursor-pointer"
               >
                 회원탈퇴
               </button>

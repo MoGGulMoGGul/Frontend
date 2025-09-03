@@ -45,8 +45,7 @@ export default function GrouptipPage() {
       router.push(
         `/grouptip/group?groupNo=${encodeURIComponent(created.groupNo)}`
       );
-    } catch (err) {
-      console.error(err);
+    } catch {
       openInfo("그룹 생성에 실패했습니다.");
     } finally {
       setCreating(false);

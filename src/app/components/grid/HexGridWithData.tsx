@@ -61,8 +61,7 @@ export default function HexGridWithData<TRaw>({
           const list = await fetcher();
           if (alive) setItems(list.map(mapItem));
         }
-      } catch (e) {
-        console.error("HexGridWithData fetch failed", e);
+      } catch {
       } finally {
         if (alive) setLoading(false);
       }

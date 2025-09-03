@@ -68,17 +68,14 @@ export const useAuthStore = create<AuthState>()(
       totalBookmarkCount: null,
 
       setTokens: (access, refresh) => {
-        console.log("[useAuthStore] setTokens", { access, refresh });
         set({ accessToken: access, refreshToken: refresh });
       },
 
       setUser: (p) => {
-        console.log("[useAuthStore] setUser", p);
         set({ login: p.login, nickname: p.nickname, userNo: p.userNo });
       },
 
       clearAuth: () => {
-        console.log("[useAuthStore] clearAuth");
         set({
           accessToken: null,
           refreshToken: null,
@@ -190,14 +187,11 @@ export const useAuthStore = create<AuthState>()(
       version: 1,
 
       onRehydrateStorage: () => {
-        console.log("[useAuthStore] rehydrating...");
         return (state, error) => {
           if (error) {
-            console.error("[useAuthStore] rehydrate error", error);
           } else {
             // 복원 완료 신호
             state?._setHasHydrated(true);
-            console.log("[useAuthStore] rehydrated state", state);
           }
         };
       },

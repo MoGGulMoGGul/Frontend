@@ -18,10 +18,7 @@ export default function AuthBootstrap() {
         if (!accessToken && refreshToken) {
           await refreshTokens(); // ← 새 액세스 토큰 발급
         }
-      } catch (e) {
-        // 실패해도 흐름 계속 (authReady만 true로)
-        // 필요하면 여기서 refreshToken 지우는 정책도 가능
-        console.warn("[AuthBootstrap] refresh failed", e);
+      } catch {
       } finally {
         setAuthReady(true);
       }

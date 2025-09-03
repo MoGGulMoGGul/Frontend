@@ -40,8 +40,7 @@ export default function InviteMembersModal({
       setErrorMsg(null);
       const rows = await searchUsersById(q);
       setResults(rows);
-    } catch (e) {
-      console.error(e);
+    } catch {
       setErrorMsg("검색에 실패했습니다.");
     } finally {
       setLoadingSearch(false);
@@ -90,8 +89,7 @@ export default function InviteMembersModal({
 
       onInvited?.(loginIds.length);
       onClose();
-    } catch (e) {
-      console.error(e);
+    } catch {
       setErrorMsg("멤버 초대에 실패했습니다.");
     } finally {
       setSubmitting(false);

@@ -20,11 +20,6 @@ let isActivating = false; // 중복 activate 방지
 const unsubMap = new Map<string, () => void>(); // dest -> unsubscribe
 let getTokenRef: TokenProvider | null = null;
 
-/** 내부: STOMP 로그 (필요하면 console.debug 유지) */
-const debugFn = (m: string) => {
-  console.debug("[STOMP]", m);
-};
-
 function wrapHandler<T = unknown>(
   dest: string,
   cb: (msg: StompMessage<T>) => void
@@ -69,7 +64,6 @@ export function ensureStomp(
     reconnectDelay: 3000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
-    debug: debugFn,
     onConnect: () => {
       isActivating = false;
       // 이미 등록된 구독들 재연결 시 자동 복구됨 (stomp.js가 세션 기준 복구X)
@@ -87,9 +81,7 @@ export function ensureStomp(
       isActivating = false;
       onDisconnected?.(evt);
     },
-    onStompError: (frame) => {
-      console.error("[STOMP ERROR]", frame.headers["message"], frame.body);
-    },
+    onStompError: () => {},
   });
 
   isActivating = true;

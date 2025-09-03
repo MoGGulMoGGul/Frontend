@@ -58,10 +58,9 @@ export default function UserFeedPage() {
         const data = await getUserProfile(id);
         if (!alive) return;
         setProfile(data);
-      } catch (e) {
+      } catch {
         if (!alive) return;
         setErr("프로필 정보를 불러오지 못했습니다.");
-        console.error(e);
       } finally {
         if (alive) setLoading(false);
       }
@@ -114,7 +113,7 @@ export default function UserFeedPage() {
       }
       const freshMe = await getUserProfile(myUserNo);
       setCountsFromProfile(freshMe);
-    } catch (e) {
+    } catch {
       // 롤백
       setProfile((prev) =>
         prev
@@ -130,7 +129,6 @@ export default function UserFeedPage() {
       );
       incFollowing(-delta);
       setActionErr("요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-      console.error(e);
     } finally {
       setProcessing(false);
     }

@@ -60,9 +60,8 @@ export default function Login() {
       await loginAndStore(id, password);
 
       router.push("/");
-    } catch (error) {
+    } catch {
       useAuthStore.getState().clearAuth();
-      console.error("로그인 실패", error);
       setIsError(true);
       setModalMessage("아이디 또는 비밀번호를 다시 확인해주세요.");
       setModalType(null);
@@ -75,10 +74,9 @@ export default function Login() {
       const result = await findId(nickname, pwForIdFind);
       setModalMessage(`아이디는: ${result} 입니다`);
       setIsError(false);
-    } catch (error) {
+    } catch {
       setModalMessage("입력한 정보와 일치하는 아이디가 없습니다. ❌");
       setIsError(true);
-      console.error(error);
     }
   };
 
@@ -87,10 +85,9 @@ export default function Login() {
       await resetPassword(resetId, resetNickname, newPw);
       setModalMessage("비밀번호가 성공적으로 재설정되었습니다 ✅");
       setIsError(false);
-    } catch (error) {
+    } catch {
       setModalMessage("재설정에 실패했습니다. ❌");
       setIsError(true);
-      console.error(error);
     }
   };
 

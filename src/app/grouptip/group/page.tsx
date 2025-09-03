@@ -124,8 +124,7 @@ export default function GrouptipGroupPage() {
         if (!alive) return;
         const found = list.find((g) => g.groupNo === groupNo);
         setGroupName(found?.name ?? `그룹 #${groupNo}`);
-      } catch (e) {
-        console.error("그룹 정보 조회 실패:", e);
+      } catch {
         if (!alive) return;
         setGroupName(`그룹 #${groupNo}`);
       } finally {
@@ -158,8 +157,6 @@ export default function GrouptipGroupPage() {
         const list = await getStoragesByGroup(groupNo);
         if (!alive) return;
         setStorages(list);
-      } catch (e) {
-        console.error("보관함 목록 조회 실패:", e);
       } finally {
         if (!alive) return;
         setLoading(false);
@@ -191,8 +188,7 @@ export default function GrouptipGroupPage() {
           res.storageNo
         }&storageName=${encodeURIComponent(name)}`
       );
-    } catch (e) {
-      console.error(e);
+    } catch {
       setInviteResult("보관함 생성에 실패했습니다.");
     }
   };
@@ -204,8 +200,7 @@ export default function GrouptipGroupPage() {
       setShowMembers(true);
       const list = await getGroupMembers(groupNo!);
       setMembers(list);
-    } catch (e) {
-      console.error("멤버 조회 실패:", e);
+    } catch {
       setShowMembers(false);
       setInviteResult("멤버 조회에 실패했습니다.");
     } finally {
@@ -220,8 +215,7 @@ export default function GrouptipGroupPage() {
       await leaveGroup(groupNo!);
       setShowLeave(false);
       router.push("/grouptip");
-    } catch (e) {
-      console.error("그룹 나가기 실패:", e);
+    } catch {
       setInviteResult("그룹 나가기에 실패했습니다.");
     } finally {
       setLeaveLoading(false);

@@ -28,7 +28,6 @@ export default function ContextMenu({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      console.log("clicked", event.target);
       if (ref.current && !ref.current.contains(event.target as Node)) {
         onClose();
       }

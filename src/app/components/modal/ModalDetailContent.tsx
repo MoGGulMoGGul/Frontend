@@ -65,8 +65,7 @@ export default function ModalDetailContent({ id, onClose }: Props) {
       setConfirmOpen(false);
       onClose();
       router.refresh?.();
-    } catch (e) {
-      console.log(e);
+    } catch {
     } finally {
       setDeleting(false);
     }

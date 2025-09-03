@@ -67,8 +67,7 @@ export default function GrouptipStoragePage() {
         } else {
           setErrorHeader("보관함을 찾을 수 없거나 권한이 없습니다.");
         }
-      } catch (e) {
-        console.error("보관함 헤더 조회 실패:", e);
+      } catch {
         if (!alive) return;
         setErrorHeader("보관함을 불러오지 못했습니다.");
       } finally {
@@ -83,9 +82,7 @@ export default function GrouptipStoragePage() {
         const tips = await getStorageTips(storageNo);
         if (!alive) return;
         setBaseTips(tips);
-      } catch (e) {
-        console.error("보관함 꿀팁 목록 실패:", e);
-      }
+      } catch {}
     })();
 
     return () => {
@@ -104,8 +101,7 @@ export default function GrouptipStoragePage() {
       await updateStorageName(storageNo, next);
       setName(next);
       setShowRename(false);
-    } catch (e) {
-      console.error(e);
+    } catch {
       openInfo("이름 변경에 실패했습니다.");
     } finally {
       setActionLoading(false);
@@ -119,8 +115,7 @@ export default function GrouptipStoragePage() {
       setShowDelete(false);
       // 쿼리 기반 목록 페이지로 이동
       router.push(`/grouptip/group?groupNo=${groupNo}`);
-    } catch (e) {
-      console.error(e);
+    } catch {
       openInfo("보관함 삭제에 실패했습니다.");
     } finally {
       setActionLoading(false);

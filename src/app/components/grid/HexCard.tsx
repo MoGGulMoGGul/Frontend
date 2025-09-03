@@ -72,11 +72,9 @@ export default function HexCard({
       try {
         setSaving(true);
         await saveBookMarkTip({ tipNo: id, storageNo: storageNo });
-        console.log("저장 완료:", { tipNo: id, storageNo });
         setShowMenu(false);
         setSavedInfo({ open: true, storageName });
-      } catch (e: unknown) {
-        console.error("보관함 저장 실패", e);
+      } catch {
       } finally {
         setSaving(false);
       }

@@ -167,8 +167,7 @@ export default function MenuItem({
       } else {
         setFolderNames((prev) => ({ ...prev, [folderId]: next }));
       }
-    } catch (err) {
-      console.log(err);
+    } catch {
       openInfo(`${entityLabel} 이름 변경에 실패했습니다.`);
       setFolderNames((prev) => ({ ...prev, [folderId]: original }));
     }
@@ -214,8 +213,7 @@ export default function MenuItem({
         router.push(href);
       }
       setDeleteTargetId(null);
-    } catch (err) {
-      console.log(err);
+    } catch {
       openInfo(`${entityLabel} 삭제에 실패했습니다.`);
     } finally {
       setActionLoading(false);
