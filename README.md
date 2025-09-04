@@ -2,19 +2,34 @@
 ![header](https://capsule-render.vercel.app/api?type=cylinder&color=EAC149&height=130&section=header&text=MOGGUL-MOGGUL%20Frontend&fontSize=50&animation=scaleIn&fontColor=FFF)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/next.js-%23000000.svg?&style=for-the-badge&logo=next.js&logoColor=white"/>
-  <img src="https://img.shields.io/badge/react-%2361DAFB.svg?&style=for-the-badge&logo=react&logoColor=white"/>
-  <img src="https://img.shields.io/badge/typescript-%233178C6.svg?&style=for-the-badge&logo=typescript&logoColor=white"/>
-  <img src="https://img.shields.io/badge/tailwindcss-%2306B6D4.svg?&style=for-the-badge&logo=tailwind-css&logoColor=white"/>
-  <br>
-  <img src="https://img.shields.io/badge/zustand-%237A5A48.svg?&style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/axios-%235A29E4.svg?&style=for-the-badge&logo=axios&logoColor=white"/>
-  <img src="https://img.shields.io/badge/reactquery-%23FF4154.svg?&style=for-the-badge&logo=react-query&logoColor=white"/>
-  <br>
-  <img src="https://img.shields.io/badge/Amazon S3-%23569A31.svg?&style=for-the-badge&logo=amazon-s3&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Amazon CloudFront-%23FF9900.svg?&style=for-the-badge&logo=amazon-cloudfront&logoColor=white"/>
-</p>
+  <!-- Framework -->
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"/>
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black"/>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"/>
+  <br/>
 
+  <!-- Styling -->
+  <img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white"/>
+  <img src="https://img.shields.io/badge/clsx-239120?style=for-the-badge"/>
+  <br/>
+
+  <!-- State & Data -->
+  <img src="https://img.shields.io/badge/Zustand-7A5A48?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white"/>
+
+  <!-- WebSocket -->
+  <img src="https://img.shields.io/badge/StompJS-6DB33F?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/SockJS-CC0000?style=for-the-badge"/>
+  <br/>
+
+  <!-- Infra -->
+  <img src="https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Amazon%20CloudFront-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white"/>
+
+  <!-- Tools -->
+  <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white"/>
+  <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white"/>
+</p>
 ---
 
 ## 프로젝트 개요
