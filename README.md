@@ -30,7 +30,9 @@
   <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white"/>
   <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white"/>
 </p>
+
 ---
+
 
 ## 프로젝트 개요
 AI 서버를 통해 생성된 꿀팁(온라인 콘텐츠 요약 정보)을 사용자들이 공유하고 관리할 수 있는 모꿀모꿀 서비스의 웹 프론트엔드입니다. 사용자 인증부터 꿀팁 생성, 보관, 그룹 공유 및 실시간 랭킹 확인까지 다양한 기능을 제공합니다.
