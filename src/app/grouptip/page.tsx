@@ -128,6 +128,7 @@ export default function GrouptipPage() {
                     alt="벌꿀"
                     width={40}
                     height={60}
+                    sizes="40px"
                   />
                 </div>
                 <div className="text-center">{g.name}</div>

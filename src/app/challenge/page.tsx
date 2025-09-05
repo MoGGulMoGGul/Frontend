@@ -115,7 +115,7 @@ export default function ChallengePage() {
                                 "/img/1bee.png"
                               )}
                               alt={item.title}
-                              sizes="20"
+                              sizes="20px"
                               fill
                             />
                           </div>

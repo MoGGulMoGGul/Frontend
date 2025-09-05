@@ -26,6 +26,15 @@ type Props = {
 export default function HexGridBase({ items, colCount = 5 }: Props) {
   const rowCount = Math.ceil(items.length / colCount);
 
+  const hexSizes = (cols: number) =>
+    `(max-width:640px) 90vw, (max-width:768px) ${Math.round(
+      100 / Math.min(2, cols)
+    )}vw, (max-width:1024px) ${Math.round(
+      100 / Math.min(3, cols)
+    )}vw, (max-width:1280px) ${Math.round(
+      100 / Math.min(4, cols)
+    )}vw, ${Math.round(100 / cols)}vw`;
+
   const columns = Array.from({ length: colCount }, (_, colIdx) =>
     Array.from({ length: rowCount }, (_, rowIdx) => {
       const index = rowIdx * colCount + colIdx;
@@ -58,6 +67,7 @@ export default function HexGridBase({ items, colCount = 5 }: Props) {
                   left={item!.image.left ?? "left-[50%]"}
                   rotate={item!.image.rotate ?? ""}
                   transform={item!.image.transform ?? "translateX(-50%)"}
+                  sizes={hexSizes(colCount)}
                 />
               )}
 

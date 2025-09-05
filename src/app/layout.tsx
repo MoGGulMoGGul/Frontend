@@ -33,7 +33,7 @@ export default function RootLayout({
           rel="preload"
           as="image"
           href="/img/logo.png"
-          sizes="180px"
+          imageSizes="180px"
           imageSrcSet="/img/logo.png"
         />
       </head>

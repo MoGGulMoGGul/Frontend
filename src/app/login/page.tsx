@@ -109,6 +109,7 @@ export default function Login() {
           alt="모꿀모꿀"
           width={180}
           height={100}
+          sizes="180px"
           priority
           fetchPriority="high"
         />

@@ -10,6 +10,7 @@ type HexImageProps = {
   rotate?: string;
   transform?: string;
   z?: number;
+  sizes?: string;
 };
 
 export default function HexImage({
@@ -21,6 +22,7 @@ export default function HexImage({
   rotate = "",
   transform,
   z = 0,
+  sizes,
 }: HexImageProps) {
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: z }}>
@@ -30,7 +32,16 @@ export default function HexImage({
           className={`absolute ${width} ${height} ${top} ${left} ${rotate}`}
           style={{ transform }}
         >
-          <Image src={src} alt="장식 이미지" fill className="object-contain" />
+          <Image
+            src={src}
+            alt="장식 이미지"
+            fill
+            sizes={
+              sizes ??
+              "(max-width:640px) 90vw, (max-width:768px) 45vw, (max-width:1024px) 30vw, (max-width:1280px) 25vw, 20vw"
+            }
+            className="object-contain"
+          />
         </div>
       )}
     </div>

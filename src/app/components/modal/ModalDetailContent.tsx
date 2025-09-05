@@ -167,6 +167,7 @@ export default function ModalDetailContent({ id, onClose }: Props) {
               alt="저장버튼"
               width={50}
               height={80}
+              sizes="50px"
               className="rounded-lg object-cover cursor-pointer"
               onClick={() => setSaveOpen(true)}
             />

@@ -35,7 +35,7 @@ export default function GrouptipGroupPage() {
   const router = useRouter();
   const sp = useSearchParams();
 
-  // ✅ useSearchParams로 교체 (옵션 2)
+  // useSearchParams로 교체 (옵션 2)
   const groupNoParam = sp.get("groupNo");
   const groupNo = useMemo(
     () => (groupNoParam == null ? null : Number(groupNoParam)),
@@ -311,6 +311,7 @@ export default function GrouptipGroupPage() {
                           alt="벌꿀"
                           width={115}
                           height={129}
+                          sizes="115px"
                         />
                         <Image
                           src="/img/1bee.png"
@@ -318,6 +319,7 @@ export default function GrouptipGroupPage() {
                           width={23}
                           height={24}
                           className="absolute bottom-[16px] left-[80px]"
+                          sizes="23px"
                         />
                       </div>
                       <div className="text-center">{s.name}</div>

@@ -224,6 +224,7 @@ export default function MyPage() {
                     width={40}
                     height={60}
                     className="object-contain pointer-events-none"
+                    sizes="40px"
                   />
                 </div>
                 <div className="text-[10px] font-semibold relative z-10">
