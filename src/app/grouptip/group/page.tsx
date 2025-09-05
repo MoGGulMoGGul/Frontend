@@ -346,6 +346,7 @@ export default function GrouptipGroupPage() {
             <p className="text-center mb-3">보관함 이름을 입력해주세요</p>
             <LabeledInput
               name="name"
+              label="보관함 이름"
               value={form.name}
               onChange={handleChange}
               placeholder="보관함 이름을 입력하세요"

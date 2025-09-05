@@ -120,6 +120,7 @@ export default function SignUp() {
               </div>
               <LabeledInput
                 name="id"
+                label="아이디"
                 value={form.id}
                 onChange={handleChange}
                 placeholder="아이디를 입력하세요"
@@ -210,6 +211,7 @@ export default function SignUp() {
               </div>
               <LabeledInput
                 name="nickname"
+                label="닉네임"
                 value={form.nickname}
                 onChange={handleChange}
                 placeholder="닉네임을 입력하세요"

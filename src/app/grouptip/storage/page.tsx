@@ -168,6 +168,9 @@ export default function GrouptipStoragePage() {
               <h3 className="text-lg font-semibold mb-3 text-center">
                 보관함 이름 변경
               </h3>
+              <label htmlFor="rename-storage" className="sr-only">
+                새 보관함 이름
+              </label>
               <input
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}

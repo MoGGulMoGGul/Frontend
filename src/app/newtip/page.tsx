@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useId } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createTipDraft, registerTip, type TipDraftResponse } from "@/lib/tips";
 import { useUserStorageStore } from "@/stores/useUserStorageStore";
@@ -19,6 +19,7 @@ import { getStoragesByGroup, type GroupStorageItem } from "@/lib/storage";
 export default function NewtipPage() {
   const router = useRouter();
   const onClose = () => router.back();
+  const storageSelectId = useId();
 
   const sp = useSearchParams();
 
@@ -225,7 +226,7 @@ export default function NewtipPage() {
   // storageNo 고정 → 안내만
   // storageNo 미고정 & groupNo 있음 → 그룹 보관함 드롭다운
   // 둘 다 없음 → 개인 보관함 드롭다운
-  const renderStorageSelect = () => {
+  const renderStorageSelect = (selectId: string) => {
     if (isStorageFixed) {
       return (
         <div className="text-sm text-gray-700">
@@ -252,6 +253,7 @@ export default function NewtipPage() {
       }
       return (
         <select
+          id={selectId}
           value={storageNo}
           onChange={(e) =>
             setStorageNo(e.target.value ? Number(e.target.value) : "")
@@ -269,6 +271,7 @@ export default function NewtipPage() {
     }
     return (
       <select
+        id={selectId}
         value={storageNo}
         onChange={(e) =>
           setStorageNo(e.target.value ? Number(e.target.value) : "")
@@ -341,8 +344,12 @@ export default function NewtipPage() {
                   </div>
                 </>
               )}
-
+              <label htmlFor="newtip-url" className="sr-only">
+                저장할 URL
+              </label>
               <input
+                id="newtip-url"
+                name="url"
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
@@ -389,31 +396,40 @@ export default function NewtipPage() {
                     placeholder="요약 결과가 여기에 표시됩니다."
                   />
 
-                  <div className="mt-4">
-                    <div className="font-semibold mb-2">공개 설정</div>
+                  <fieldset className="mt-4">
+                    <legend className="font-semibold mb-2">공개 설정</legend>
                     <div className="flex gap-4">
-                      <label className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <input
+                          id="isPublic-yes"
                           type="radio"
+                          name="isPublic"
                           checked={isPublic}
                           onChange={() => setIsPublic(true)}
                         />
-                        공개
-                      </label>
-                      <label className="flex items-center gap-2">
+                        <label htmlFor="isPublic-yes">공개</label>
+                      </div>
+                      <div className="flex items-center gap-2">
                         <input
+                          id="isPublic-no"
                           type="radio"
+                          name="isPublic"
                           checked={!isPublic}
                           onChange={() => setIsPublic(false)}
                         />
-                        비공개
-                      </label>
+                        <label htmlFor="isPublic-no">비공개</label>
+                      </div>
                     </div>
-                  </div>
+                  </fieldset>
 
                   <div className="mt-6">
-                    <div className="font-semibold mb-2">저장할 보관함</div>
-                    {renderStorageSelect()}
+                    <label
+                      htmlFor={storageSelectId}
+                      className="font-semibold mb-2 block"
+                    >
+                      저장할 보관함
+                    </label>
+                    {renderStorageSelect(storageSelectId)}
                   </div>
                 </>
               )}

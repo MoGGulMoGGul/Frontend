@@ -87,6 +87,7 @@ export default function GrouptipPage() {
             <p className="text-center">그룹의 이름을 입력해주세요</p>
             <LabeledInput
               name="name"
+              label="그룹 이름"
               value={form.name}
               placeholder="그룹 이름을 입력하세요"
               onChange={(e) => setForm({ name: e.target.value })}
