@@ -1,10 +1,19 @@
-const nextConfig = {
-  output: "export",
-  trailingSlash: true,
+import type { NextConfig } from "next";
+
+const isLHCI = process.env.LHCI === "true";
+
+// 디버깅 로그 (빌드 시 콘솔에 찍힘)
+console.log(`[next.config] LHCI=${process.env.LHCI} → isLHCI=${isLHCI}`);
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
+  trailingSlash: true,
+
+  // LHCI 모드일 땐 서버 빌드(= export 끔), 그 외엔 기존처럼 export 유지
+  ...(isLHCI ? {} : { output: "export" }),
 
   images: {
-    unoptimized: true, // S3/CloudFront 정적 배포에 필수
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

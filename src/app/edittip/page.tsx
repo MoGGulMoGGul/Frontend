@@ -119,11 +119,13 @@ export default function EditTipPage() {
                 <div className="w-full max-w-[520px] mb-4">
                   <div className="relative aspect-video w-full overflow-hidden rounded-md border border-gray-200 bg-white">
                     <Image
-                      src={thumb}
+                      src={resolveLocalThumb(thumb, "/img/1bee.png")}
                       alt="썸네일"
                       fill
                       sizes="(max-width: 768px) 100vw, 520px"
                       style={{ objectFit: "contain" }}
+                      priority
+                      fetchPriority="high"
                     />
                   </div>
                 </div>

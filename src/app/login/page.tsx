@@ -104,7 +104,14 @@ export default function Login() {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="flex flex-col items-center gap-6">
-        <Image src={"/img/logo.png"} alt="모꿀모꿀" width={180} height={100} />
+        <Image
+          src={"/img/logo.png"}
+          alt="모꿀모꿀"
+          width={180}
+          height={100}
+          priority
+          fetchPriority="high"
+        />
         <div className="flex items-center justify-center flex-col">
           <div className="w-[500px] border border-[#d9d9d9] rounded-xl p-6">
             <form

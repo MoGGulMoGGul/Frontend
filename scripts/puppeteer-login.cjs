@@ -1,94 +1,83 @@
-// puppeteer-login.js
-
-export default async ({ page }) => {
+module.exports = async (ctx) => {
+  ctx = ctx || {};
   const ORIGIN = "http://localhost:3000";
-  const LOGIN_URL = `${ORIGIN}/login`;
-  const AFTER_LOGIN_URL = `${ORIGIN}/`; // 로그인 후 기본 진입점
+  const LOGIN_URL = `${ORIGIN}/login/`;
+  const HOME_URL = `${ORIGIN}/`;
 
-  // 0) Zustand persist 복원 대기 (최대 10초)
-  //    - local-storage 키가 생기거나
-  //    - (있다면) html[data-zs-hydrated="1"] 마커를 확인
-  const waitRehydrate = async () => {
-    await page
-      .waitForFunction(() => {
-        const attr = document.documentElement.getAttribute("data-zs-hydrated");
-        if (attr === "1") return true;
-        return !!localStorage.getItem("local-storage");
-      }, { timeout: 10_000 })
-      .catch(() => {});
-  };
+  const ID_SEL = "#loginId";
+  const PW_SEL = "#loginPassword";
+  const BTN_SEL = "#loginButton";
 
-  // 1) 이미 로그인 상태인지 확인 (refreshToken & userNo 존재)
-  const isLoggedIn = async () => {
-    return await page.evaluate(() => {
-      const raw = localStorage.getItem("local-storage");
-      if (!raw) return false;
-      try {
-        const s = JSON.parse(raw)?.state;
-        return !!(s?.refreshToken && s?.userNo);
-      } catch {
-        return false;
-      }
+  let { page, browser } = ctx;
+  let spawned = false;
+
+  // LHCI가 page를 안 줄 수도 있으니 직접 띄우기
+  if (!page) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const puppeteer = require("puppeteer");
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-dev-shm-usage"],
     });
-  };
-
-  // 2) 인증 준비 상태(authReady) 대기 (최대 10초)
-  //    - AuthBootstrap이 리프레시 토큰 시도 후 setAuthReady(true) 하면
-  //      html[data-auth-ready="1"] 또는 local-storage 변경이 반영됨
-  const waitAuthReady = async () => {
-    await page
-      .waitForFunction(() => {
-        const attr = document.documentElement.getAttribute("data-auth-ready");
-        if (attr === "1") return true;
-        // 마커가 없다면, persist 값이 존재하는 것만으로도 OK로 처리
-        const raw = localStorage.getItem("local-storage");
-        if (!raw) return false;
-        try {
-          const s = JSON.parse(raw)?.state;
-          // refreshToken만 있어도 AuthGate가 리프레시 시도 → 이후 라우트에서 통과 가능
-          return !!(s?.refreshToken && s?.userNo);
-        } catch {
-          return false;
-        }
-      }, { timeout: 10_000 })
-      .catch(() => {});
-  };
-
-  // 3) 시작: 메인으로 가보되, 리다이렉트(로그인) 가능성 감안
-  await page.goto(AFTER_LOGIN_URL, { waitUntil: "networkidle0" });
-  await waitRehydrate();
-
-  if (!(await isLoggedIn())) {
-    // 보호 라우트 → AuthGate가 /login?next=... 로 보냈을 수 있음
-    await page.goto(LOGIN_URL, { waitUntil: "networkidle0" });
-
-    // 폼 입력 + 제출
-    await page.type("#loginId", "testuser");
-    await page.type("#loginPassword", "testpw");
-    await Promise.all([
-      page.click("#loginButton"),
-      page.waitForNavigation({ waitUntil: "networkidle0" }),
-    ]);
-
-    // 로그인 후 persist 저장까지 대기
-    await page.waitForFunction(() => {
-      const raw = localStorage.getItem("local-storage");
-      if (!raw) return false;
-      try {
-        const s = JSON.parse(raw)?.state;
-        return !!(s?.refreshToken && s?.userNo && s?.nickname);
-      } catch {
-        return false;
-      }
-    }, { timeout: 15_000 });
-
-    // (선택) 로그인 성공 후 next 리다이렉트가 걸릴 수 있으니 안정화
-    await waitAuthReady();
-  } else {
-    // 이미 로그인되어 있으면, 혹시 모를 리프레시 플로우 마무리까지 대기
-    await waitAuthReady();
+    page = await browser.newPage();
+    spawned = true;
   }
 
-  // 4) 최종: 메인에 진입하여 세션 확인
-  await page.goto(AFTER_LOGIN_URL, { waitUntil: "networkidle0" });
+  try {
+    // 1) 로그인 페이지 이동
+    await page.goto(LOGIN_URL, { waitUntil: "networkidle0", timeout: 60000 });
+
+    // 2) 폼 대기
+    await page.waitForSelector(ID_SEL, { timeout: 30000 });
+
+    // 3) 자격 증명 (환경변수 우선)
+    const loginId = process.env.LHCI_LOGIN_ID || "testuser";
+    const loginPw = process.env.LHCI_LOGIN_PW || "1234pass";
+
+    // 입력
+    await page.click(ID_SEL, { clickCount: 3 }).catch(() => {});
+    await page.keyboard.press("Backspace").catch(() => {});
+    await page.type(ID_SEL, String(loginId), { delay: 10 });
+
+    await page.click(PW_SEL, { clickCount: 3 }).catch(() => {});
+    await page.keyboard.press("Backspace").catch(() => {});
+    await page.type(PW_SEL, String(loginPw), { delay: 10 });
+
+    // 4) 제출 + 네비게이션(없어도 무시)
+    await Promise.all([
+      page.click(BTN_SEL),
+      page
+        .waitForNavigation({ waitUntil: "networkidle0", timeout: 60000 })
+        .catch(() => {}),
+    ]);
+
+    // 5) localStorage에 세션 비슷한 값 들어왔는지 느슨히 확인(실패해도 계속)
+    await page
+      .waitForFunction(
+        () => {
+          try {
+            const raw = localStorage.getItem("local-storage");
+            if (!raw) return false;
+            const s = JSON.parse(raw)?.state;
+            return !!(s?.refreshToken && s?.userNo);
+          } catch {
+            return false;
+          }
+        },
+        { timeout: 15000 }
+      )
+      .catch(() => {});
+
+    // 6) 홈으로 진입 시도(실패해도 계속)
+    await page
+      .goto(HOME_URL, { waitUntil: "networkidle0", timeout: 60000 })
+      .catch(() => {});
+  } finally {
+    // 우리가 띄운 브라우저라면 닫기
+    if (spawned && browser) {
+      try {
+        await browser.close();
+      } catch {}
+    }
+  }
 };

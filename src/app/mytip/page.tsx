@@ -66,6 +66,9 @@ export default function MytipPage() {
                   alt="프로필 이미지"
                   fill
                   className="object-cover"
+                  sizes="96px"
+                  priority
+                  fetchPriority="high"
                 />
               </div>
               <div className="text-left">
@@ -92,6 +95,7 @@ export default function MytipPage() {
                   width={40}
                   height={60}
                   className="object-contain"
+                  sizes="40px"
                 />
               </div>
               <div className="text-[10px] font-semibold relative z-10">

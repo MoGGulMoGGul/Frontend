@@ -87,6 +87,8 @@ export default function ChallengePage() {
                           sizes="100px"
                           fill
                           className="object-cover"
+                          priority
+                          fetchPriority="high"
                         />
                       </div>
                       <div className="min-w-0">

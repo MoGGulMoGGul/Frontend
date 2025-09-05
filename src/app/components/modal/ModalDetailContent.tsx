@@ -111,7 +111,7 @@ export default function ModalDetailContent({ id, onClose }: Props) {
 
   const title = data?.title ?? "(제목 없음)";
   const rawThumb = data?.thumbnailUrl ?? null;
-  const thumb = resolveLocalThumb(rawThumb, "/img/코어박살.jpg");
+  const thumb = resolveLocalThumb(rawThumb, "/img/1bee.png");
   const tags = data?.tags ?? [];
   const url = data?.url ?? "";
   const content = data?.contentSummary ?? "";
@@ -127,9 +127,10 @@ export default function ModalDetailContent({ id, onClose }: Props) {
             src={thumb}
             alt={title}
             fill
-            className="rounded-lg object-cover"
-            sizes="350px"
-            unoptimized={thumb?.startsWith?.("data:") ?? false}
+            className="rounded-lg object-contain"
+            sizes="(max-width: 768px) 90vw, 350px"
+            priority
+            fetchPriority="high"
           />
         </div>
 

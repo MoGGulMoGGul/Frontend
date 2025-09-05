@@ -95,7 +95,15 @@ export default function SignUp() {
     <div className="flex flex-col items-center justify-center h-screen">
       {/* 로고 + 폼 묶음 */}
       <div className="flex flex-col items-center gap-6">
-        <Image src="/img/logo.png" alt="모꿀모꿀" width={180} height={100} />
+        <Image
+          src="/img/logo.png"
+          alt="모꿀모꿀"
+          width={180}
+          height={100}
+          sizes="180px"
+          priority
+          fetchPriority="high"
+        />
 
         {/* 회원가입 폼 */}
         <div className="w-[500px] border border-[#d9d9d9] rounded-xl p-6">
