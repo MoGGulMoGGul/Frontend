@@ -1,8 +1,8 @@
 module.exports = async (ctx) => {
   ctx = ctx || {};
   const ORIGIN = "http://localhost:3000";
-  const LOGIN_URL = `${ORIGIN}/login/`;
-  const HOME_URL = `${ORIGIN}/`;
+  const LOGIN_URL = `${ORIGIN}/login`;
+  const HOME_URL = `${ORIGIN}`;
 
   const ID_SEL = "#loginId";
   const PW_SEL = "#loginPassword";

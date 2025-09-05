@@ -282,7 +282,7 @@ export default function MenuItem({
         prefetch={false}
         className="h-12 flex items-center place-content-between text-lg"
         onClick={(e) => {
-          if (hrefBase === "#") e.preventDefault(); // 해시 점프 방지
+          if (hrefBase === "#") e.preventDefault();
           toggleArrow();
         }}
       >
