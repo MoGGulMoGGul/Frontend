@@ -129,8 +129,6 @@ export default function ModalDetailContent({ id, onClose }: Props) {
             fill
             className="rounded-lg object-contain"
             sizes="(max-width: 768px) 90vw, 350px"
-            priority
-            fetchPriority="high"
           />
         </div>
 
