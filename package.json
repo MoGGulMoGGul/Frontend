@@ -9,7 +9,9 @@
     "start": "next start",
     "start:3000": "next start -p 3000",
     "lint": "next lint",
-    "lhci": "lhci autorun --config=./lighthouserc.json"
+    "lhci": "lhci autorun --config=./lighthouserc.json",
+    "build:lhci": "NEXT_PUBLIC_LHCI=1 next build",
+    "start:lhci": "NEXT_PUBLIC_LHCI=1 next start"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",

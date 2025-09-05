@@ -9,6 +9,9 @@ import { usePathname, useRouter } from "next/navigation";
 import CommonModal from "../modal/CommonModal";
 import OkBtn from "../common/OkBtn";
 
+/** ★ 끝 슬래시 제거 (루트 "/"는 유지) */
+const normalizeBase = (p: string) => (p === "/" ? p : p.replace(/\/+$/, ""));
+
 interface Folder {
   id: number;
   name: string;
@@ -62,6 +65,9 @@ export default function MenuItem({
   const pathname = usePathname();
   const router = useRouter();
 
+  /** ★ 여기서 한 번만 정규화해서 아래 전부 동일 값 사용 */
+  const hrefBase = normalizeBase(href);
+
   const openAddModal = () => {
     setAddName("");
     setAddOpen(true);
@@ -73,12 +79,13 @@ export default function MenuItem({
     if (!name) return;
     try {
       setAddLoading(true);
-      await onAdd?.(name); // ← 이름을 Sidebar로 전달
+      await onAdd?.(name);
       setAddOpen(false);
     } finally {
       setAddLoading(false);
     }
   };
+
   useEffect(() => {
     const next = folders.reduce<Record<number, string>>((acc, f) => {
       acc[f.id] = f.name;
@@ -96,13 +103,14 @@ export default function MenuItem({
 
   // 라우트가 현재 섹션을 가리키는지 계산 + active 폴더 표시
   useEffect(() => {
-    if (!showArrow || href === "#") return;
+    if (!showArrow || hrefBase === "#") return;
 
-    const inSection = pathname === href || pathname.startsWith(href + "/");
+    const inSection =
+      pathname === hrefBase || pathname.startsWith(hrefBase + "/");
     if (isArrowUp !== inSection) setIsArrowUp(inSection);
 
     if (inSection) {
-      const rest = pathname.slice(href.length);
+      const rest = pathname.slice(hrefBase.length);
       const firstSeg = rest.startsWith("/") ? rest.split("/")[1] : "";
       const maybeId = Number(firstSeg);
       const newActive =
@@ -117,21 +125,23 @@ export default function MenuItem({
       if (editFolderId !== null) setEditFolderId(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, href, showArrow, folders]);
+  }, [pathname, hrefBase, showArrow, folders]);
 
   // 라우팅으로 들어와서 처음 열릴 때도 onExpand 한 번 호출
   useEffect(() => {
-    if (!showArrow || href === "#") return;
-    const inSection = pathname === href || pathname.startsWith(href + "/");
+    if (!showArrow || hrefBase === "#") return;
+    const inSection =
+      pathname === hrefBase || pathname.startsWith(hrefBase + "/");
     if (inSection && !isArrowUp) {
       setIsArrowUp(true);
       onExpand?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, href, showArrow]);
+  }, [pathname, hrefBase, showArrow]);
 
   const toggleArrow = () => {
-    const inSection = pathname === href || pathname.startsWith(href + "/");
+    const inSection =
+      pathname === hrefBase || pathname.startsWith(hrefBase + "/");
 
     if (inSection) {
       setIsArrowUp((prev) => {
@@ -206,11 +216,11 @@ export default function MenuItem({
         await onDeleteFolder(deleteTargetId);
       }
       if (
-        href !== "#" &&
-        (pathname === `${href}/${deleteTargetId}` ||
-          pathname.startsWith(`${href}/${deleteTargetId}/`))
+        hrefBase !== "#" &&
+        (pathname === `${hrefBase}/${deleteTargetId}` ||
+          pathname.startsWith(`${hrefBase}/${deleteTargetId}/`))
       ) {
-        router.push(href);
+        router.push(hrefBase);
       }
       setDeleteTargetId(null);
     } catch {
@@ -268,10 +278,13 @@ export default function MenuItem({
       )}
 
       <Link
-        href={href}
+        href={hrefBase}
         prefetch={false}
         className="h-12 flex items-center place-content-between text-lg"
-        onClick={toggleArrow}
+        onClick={(e) => {
+          if (hrefBase === "#") e.preventDefault(); // 해시 점프 방지
+          toggleArrow();
+        }}
       >
         <div className="flex items-center">
           <div className="w-7 h-7 rounded-full bg-white border border-[var(--color-honey-pale)] text-center flex items-center justify-center mr-2">
@@ -331,60 +344,69 @@ export default function MenuItem({
           )}
 
           <ul className="mb-4">
-            {folders.map((f) => (
-              <li key={f.id}>
-                <Link
-                  href={linkBuilder ? linkBuilder(f.id) : `${href}/${f.id}`}
-                  prefetch={false}
-                  onClick={() => setActiveFolderId(f.id)}
-                  className={`py-1 cursor-pointer flex items-center justify-between px-4 rounded-lg
+            {folders.map((f) => {
+              // ★ 폴더 링크 생성 시에도 정규화 보장
+              const childHref = linkBuilder
+                ? normalizeBase(linkBuilder(f.id))
+                : `${hrefBase}/${f.id}`;
+
+              return (
+                <li key={f.id}>
+                  <Link
+                    href={childHref}
+                    prefetch={false}
+                    onClick={() => setActiveFolderId(f.id)}
+                    className={`py-1 cursor-pointer flex items-center justify-between px-4 rounded-lg
                     ${
                       activeFolderId === f.id
                         ? "bg-[var(--color-honey-pale)]"
                         : "hover:bg-[var(--color-honey-pale)]"
                     }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    {editFolderId === f.id ? (
-                      <input
-                        autoFocus
-                        value={folderNames[f.id] ?? ""}
-                        onChange={(e) => handleNameChange(f.id, e.target.value)}
-                        onBlur={() => handleInputBlur(f.id)}
-                        onKeyDown={(e) => handleInputKeyDown(e, f.id)}
-                        className="w-full px-1 border border-gray-300 rounded"
-                      />
-                    ) : (
-                      <span
-                        className="block truncate"
-                        title={folderNames[f.id]}
-                      >
-                        {folderNames[f.id]}
-                      </span>
-                    )}
-                  </div>
-
-                  <div
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleContextMenu(f.id);
-                    }}
-                    className="relative py-2 pl-2"
                   >
-                    <Ellipsis />
-                    {contextOpenId === f.id && (
-                      <div className="absolute top-0 left-2 z-10">
-                        <ContextMenu
-                          items={menuItems(f.id)}
-                          onClose={() => setContextOpenId(null)}
+                    <div className="flex-1 min-w-0">
+                      {editFolderId === f.id ? (
+                        <input
+                          autoFocus
+                          value={folderNames[f.id] ?? ""}
+                          onChange={(e) =>
+                            handleNameChange(f.id, e.target.value)
+                          }
+                          onBlur={() => handleInputBlur(f.id)}
+                          onKeyDown={(e) => handleInputKeyDown(e, f.id)}
+                          className="w-full px-1 border border-gray-300 rounded"
                         />
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              </li>
-            ))}
+                      ) : (
+                        <span
+                          className="block truncate"
+                          title={folderNames[f.id]}
+                        >
+                          {folderNames[f.id]}
+                        </span>
+                      )}
+                    </div>
+
+                    <div
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleContextMenu(f.id);
+                      }}
+                      className="relative py-2 pl-2"
+                    >
+                      <Ellipsis />
+                      {contextOpenId === f.id && (
+                        <div className="absolute top-0 left-2 z-10">
+                          <ContextMenu
+                            items={menuItems(f.id)}
+                            onClose={() => setContextOpenId(null)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}
