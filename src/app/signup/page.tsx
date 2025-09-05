@@ -109,15 +109,6 @@ export default function SignUp() {
         <div className="w-[500px] border border-[#d9d9d9] rounded-xl p-6">
           <div className="mb-18">
             <div className="flex flex-col mb-3">
-              <div className="flex justify-between items-center mb-1">
-                <div className="text-sm font-medium">아이디</div>
-                <button
-                  onClick={handleCheckIdDuplicate}
-                  className="bg-[#FFF3B0]/70 border-[#FFEF96] text-sm px-3 py-1 rounded-md hover:bg-[#FFEF96] cursor-pointer"
-                >
-                  중복검사
-                </button>
-              </div>
               <LabeledInput
                 name="id"
                 label="아이디"
@@ -125,6 +116,15 @@ export default function SignUp() {
                 onChange={handleChange}
                 placeholder="아이디를 입력하세요"
                 autoComplete="off"
+                right={
+                  <button
+                    type="button"
+                    onClick={handleCheckIdDuplicate}
+                    className="bg-[#FFF3B0]/70 border-[#FFEF96] text-sm px-3 py-1 rounded-md hover:bg-[#FFEF96]"
+                  >
+                    중복검사
+                  </button>
+                }
               />
             </div>
 
@@ -200,21 +200,21 @@ export default function SignUp() {
             )}
 
             <div className="flex flex-col mb-3">
-              <div className="flex justify-between items-center mb-1">
-                <div className="text-sm font-medium">닉네임</div>
-                <button
-                  onClick={handleCheckNicknameDuplicate}
-                  className="bg-[#FFF3B0]/70 border-[#FFEF96] text-sm px-3 py-1 rounded-md hover:bg-[#FFEF96] cursor-pointer"
-                >
-                  중복검사
-                </button>
-              </div>
               <LabeledInput
                 name="nickname"
                 label="닉네임"
                 value={form.nickname}
                 onChange={handleChange}
                 placeholder="닉네임을 입력하세요"
+                right={
+                  <button
+                    type="button"
+                    onClick={handleCheckNicknameDuplicate}
+                    className="bg-[#FFF3B0]/70 border-[#FFEF96] text-sm px-3 py-1 rounded-md hover:bg-[#FFEF96]"
+                  >
+                    중복검사
+                  </button>
+                }
               />
             </div>
           </div>

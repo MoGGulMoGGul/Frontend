@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface LabeledInputProps {
   label?: string;
   name?: string;
@@ -7,6 +9,7 @@ interface LabeledInputProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   autoComplete?: string;
   id?: string;
+  right?: React.ReactNode;
 }
 
 export default function LabeledInput({
@@ -18,10 +21,22 @@ export default function LabeledInput({
   onChange,
   autoComplete,
   id,
+  right,
 }: LabeledInputProps) {
+  const reactGenId = useId();
+  const inputId = id ?? (name ? `input-${name}` : `input-${reactGenId}`);
+
   return (
     <div className="flex flex-col mb-3">
-      <div className="text-sm mb-1 font-medium">{label}</div>
+      {label ? (
+        <label
+          htmlFor={inputId}
+          className="text-sm mb-1 font-medium flex items-center justify-between"
+        >
+          <span>{label}</span>
+          {right ? <span className="ml-3">{right}</span> : null}
+        </label>
+      ) : null}
       <div>
         <input
           id={id}
