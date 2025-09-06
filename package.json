@@ -40,5 +40,10 @@
   },
   "files.associations": {
     "*.cjs": "javascript"
-  }
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Edge versions",
+    "last 2 Safari major versions"
+  ]
 }

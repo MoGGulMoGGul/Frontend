@@ -102,7 +102,6 @@ export default function SignUp() {
           height={100}
           sizes="180px"
           priority
-          fetchPriority="high"
         />
 
         {/* 회원가입 폼 */}

@@ -172,7 +172,6 @@ export default function UserFeedPage() {
                     sizes="96px"
                     className="object-cover"
                     priority
-                    fetchPriority="high"
                   />
                 </div>
                 <div className="text-left">

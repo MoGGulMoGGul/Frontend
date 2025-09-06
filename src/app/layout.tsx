@@ -4,12 +4,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 
-import NotificationProvider from "@/app/components/layout/NotificationContext";
-import AuthGate from "@/app/components/auth/AuthGate";
 import AppFrame from "@/app/components/layout/AppFrame";
-import AuthBootstrap from "@/app/components/auth/AuthBootstrap";
 import AuthReadyFlag from "./components/system/AuthReadyFlag";
 import localFont from "next/font/local";
+import ProvidersClient from "./ProvidersClient"; // ★ 추가: 클라이언트 래퍼
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -23,14 +21,11 @@ export const metadata: Metadata = {
 };
 
 const pretendard = localFont({
-  src: [
-    {
-      path: "./fonts/Pretendard-Regular.woff2",
-      style: "normal",
-    },
-  ],
+  src: [{ path: "./fonts/Pretendard-Regular.woff2", style: "normal" }],
   variable: "--font-pretendard",
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "Apple SD Gothic Neo", "Malgun Gothic", "sans-serif"],
 });
 
 export default function RootLayout({
@@ -40,30 +35,38 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/Pretendard-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${pretendard.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Script id="remove-ext-attrs" strategy="afterInteractive">
+        <Script id="remove-ext-attrs" strategy="lazyOnload">
           {`
-            const targetAttrs = ['cz-shortcut-listen'];
-                  
-            function cleanAttrs() {
-              if (!document?.body) return;
-              for (const attr of targetAttrs) {
-                if (document.body.hasAttribute(attr)) {
-                  document.body.removeAttribute(attr);
+            (function () {
+              const targetAttrs = ['cz-shortcut-listen'];
+              function cleanAttrs() {
+                if (!document?.body) return;
+                for (const attr of targetAttrs) {
+                  if (document.body.hasAttribute(attr)) {
+                    document.body.removeAttribute(attr);
+                  }
                 }
               }
-            }
-
-            // 최초 1회 실행
-            cleanAttrs();
+              (window.requestIdleCallback || setTimeout)(cleanAttrs, 1);
+            })();
           `}
         </Script>
 
-        <NotificationProvider>
-          <AuthBootstrap />
+        {/* 클라이언트 전용 트리 안으로 AppFrame+children을 넣어줌 */}
+        <ProvidersClient>
           <Suspense
             fallback={
               <div className="w-full h-[60vh] grid place-items-center text-gray-500">
@@ -71,12 +74,10 @@ export default function RootLayout({
               </div>
             }
           >
-            <AuthGate>
-              <AppFrame>{children}</AppFrame>
-            </AuthGate>
+            <AppFrame>{children}</AppFrame>
           </Suspense>
           <AuthReadyFlag />
-        </NotificationProvider>
+        </ProvidersClient>
       </body>
     </html>
   );

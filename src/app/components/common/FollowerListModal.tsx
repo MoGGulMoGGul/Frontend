@@ -174,7 +174,6 @@ export default function FollowerListModal({
                         fill
                         className="object-cover"
                         priority
-                        fetchPriority="high"
                       />
                     </div>
                     <span className="text-xl">{f.nickname}</span>

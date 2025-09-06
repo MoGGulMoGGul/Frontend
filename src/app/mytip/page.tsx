@@ -68,7 +68,6 @@ export default function MytipPage() {
                   className="object-cover"
                   sizes="96px"
                   priority
-                  fetchPriority="high"
                 />
               </div>
               <div className="text-left">

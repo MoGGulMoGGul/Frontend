@@ -125,7 +125,6 @@ export default function EditTipPage() {
                       sizes="(max-width: 768px) 100vw, 520px"
                       style={{ objectFit: "contain" }}
                       priority
-                      fetchPriority="high"
                     />
                   </div>
                 </div>
