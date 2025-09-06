@@ -64,20 +64,17 @@ export default function RootLayout({
 
         <NotificationProvider>
           <AuthBootstrap />
-          <AuthGate>
-            <AppFrame>
-              <Suspense
-                fallback={
-                  <div className="w-full h-[60vh] grid place-items-center text-gray-500">
-                    로딩 중...
-                  </div>
-                }
-              >
-                {" "}
-                {children}
-              </Suspense>
-            </AppFrame>
-          </AuthGate>
+          <Suspense
+            fallback={
+              <div className="w-full h-[60vh] grid place-items-center text-gray-500">
+                로딩 중...
+              </div>
+            }
+          >
+            <AuthGate>
+              <AppFrame>{children}</AppFrame>
+            </AuthGate>
+          </Suspense>
           <AuthReadyFlag />
         </NotificationProvider>
       </body>
