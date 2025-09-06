@@ -20,7 +20,6 @@
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sockjs": "^0.3.24",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
