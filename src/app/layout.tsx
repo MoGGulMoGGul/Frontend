@@ -56,25 +56,29 @@ export default function RootLayout({
                 }
               }
             }
+
             // 최초 1회 실행
             cleanAttrs();
           `}
         </Script>
 
         <NotificationProvider>
-          <Suspense
-            fallback={
-              <div className="w-full h-[60vh] grid place-items-center text-gray-500">
-                로딩 중...
-              </div>
-            }
-          >
-            <AuthBootstrap />
-            <AuthGate>
-              <AppFrame>{children}</AppFrame>
-            </AuthGate>
-            <AuthReadyFlag />
-          </Suspense>
+          <AuthBootstrap />
+          <AuthGate>
+            <AppFrame>
+              <Suspense
+                fallback={
+                  <div className="w-full h-[60vh] grid place-items-center text-gray-500">
+                    로딩 중...
+                  </div>
+                }
+              >
+                {" "}
+                {children}
+              </Suspense>
+            </AppFrame>
+          </AuthGate>
+          <AuthReadyFlag />
         </NotificationProvider>
       </body>
     </html>
