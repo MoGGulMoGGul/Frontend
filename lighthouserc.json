@@ -24,10 +24,10 @@
         "https://moggulmoggul.kro.kr/signup",
         "https://moggulmoggul.kro.kr/user?userNo=5",
         "https://moggulmoggul.kro.kr/?modal=120",
-        "http://localhost:3000/mytip/storage?storageNo=3",
-        "http://localhost:3000/grouptip",
-        "http://localhost:3000/grouptip/group?groupNo=13",
-        "http://localhost:3000/grouptip/storage?groupNo=13&storageNo=44&storageName=%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8"
+        "https://moggulmoggul.kro.kr/mytip/storage?storageNo=3",
+        "https://moggulmoggul.kro.kr/grouptip",
+        "https://moggulmoggul.kro.kr/grouptip/group?groupNo=13",
+        "https://moggulmoggul.kro.kr/grouptip/storage?groupNo=13&storageNo=44&storageName=%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8"
       ]
     },
     "assert": { "preset": "lighthouse:recommended" },
