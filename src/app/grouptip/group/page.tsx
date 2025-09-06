@@ -350,6 +350,9 @@ export default function GrouptipGroupPage() {
               value={form.name}
               onChange={handleChange}
               placeholder="보관함 이름을 입력하세요"
+              hideLabelText
+              labelClassName="sr-only"
+              autoComplete="off"
             />
             <div className="flex justify-center gap-2 pt-4">
               <OkBtn label="보관함 생성하기" onClick={handleCreateStorage} />

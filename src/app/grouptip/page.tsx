@@ -88,9 +88,12 @@ export default function GrouptipPage() {
             <LabeledInput
               name="name"
               label="그룹 이름"
+              autoComplete="off"
+              hideLabelText
               value={form.name}
               placeholder="그룹 이름을 입력하세요"
               onChange={(e) => setForm({ name: e.target.value })}
+              labelClassName="sr-only"
             />
             <div className="flex justify-center gap-2 pt-4">
               <OkBtn label="벌집생성하기" onClick={handleCreateGroup} />
