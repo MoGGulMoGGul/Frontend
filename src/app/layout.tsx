@@ -47,17 +47,17 @@ export default function RootLayout({
         <Script id="remove-ext-attrs" strategy="afterInteractive">
           {`
             const targetAttrs = ['cz-shortcut-listen'];
+                  
             function cleanAttrs() {
               if (!document?.body) return;
-              targetAttrs.forEach(attr => {
+              for (const attr of targetAttrs) {
                 if (document.body.hasAttribute(attr)) {
                   document.body.removeAttribute(attr);
                 }
-              });
+              }
             }
+            // 최초 1회 실행
             cleanAttrs();
-            new MutationObserver(() => cleanAttrs())
-              .observe(document.documentElement, { attributes: true, subtree: true });
           `}
         </Script>
 
