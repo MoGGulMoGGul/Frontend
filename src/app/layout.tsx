@@ -9,6 +9,7 @@ import AuthGate from "@/app/components/auth/AuthGate";
 import AppFrame from "@/app/components/layout/AppFrame";
 import AuthBootstrap from "@/app/components/auth/AuthBootstrap";
 import AuthReadyFlag from "./components/system/AuthReadyFlag";
+import localFont from "next/font/local";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -21,6 +22,17 @@ export const metadata: Metadata = {
   description: "모꿀모꿀 — 꿀팁 아카이브",
 };
 
+const pretendard = localFont({
+  src: [
+    {
+      path: "./fonts/Pretendard-Regular.woff2",
+      style: "normal",
+    },
+  ],
+  variable: "--font-pretendard",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: {
@@ -29,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${pretendard.variable} antialiased`}
         suppressHydrationWarning
       >
         <Script id="remove-ext-attrs" strategy="afterInteractive">
